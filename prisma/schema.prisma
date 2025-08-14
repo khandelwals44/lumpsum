@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  profile       UserProfile?
+  goals         InvestmentGoal[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  age                   Int
+  gender                String
+  income                Float
+  location              String
+  riskAppetite          String
+  currentPortfolioValue Float
+  monthlySIPCapacity    Float
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model InvestmentGoal {
+  id                        String   @id @default(cuid())
+  userId                    String
+  name                      String
+  targetAmount              Float
+  timeHorizon               Int
+  priority                  String
+  currentSavings            Float
+  monthlyContribution       Float
+  projectedValue            Float
+  requiredMonthlyInvestment Float
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetAllocation   AssetAllocation?
+  fundRecommendations FundRecommendation[]
+}
+
+model AssetAllocation {
+  id                String @id @default(cuid())
+  goalId            String @unique
+  equity            Float
+  debt              Float
+  hybrid            Float
+  gold              Float
+  international     Float
+
+  goal InvestmentGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model FundRecommendation {
+  id           String @id @default(cuid())
+  goalId       String
+  fundId       String
+  fundName     String
+  category     String
+  allocation   Float
+  reason       String
+  riskLevel    String
+  expenseRatio Float
+  nav          Float
+  fundSize     Float
+  minInvestment Float
+  oneYearReturn Float
+  threeYearReturn Float
+  fiveYearReturn Float
+
+  goal InvestmentGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model MutualFund {
+  id            String   @id @default(cuid())
+  name          String
+  category      String
+  subCategory   String
+  assetClass    String
+  riskLevel     String
+  expenseRatio  Float
+  nav           Float
+  fundSize      Float
+  minInvestment Float
+  benchmark     String
+  fundManager   String
+  inceptionDate DateTime
+  isActive      Boolean  @default(true)
+  oneYearReturn Float?
+  threeYearReturn Float?
+  fiveYearReturn Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

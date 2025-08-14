@@ -1,3 +1,8 @@
+/**
+ * URL state helpers
+ * - useUrlState: reflect local UI state in the URL query to create shareable links
+ * - parseParamNumber: safe parse helper with fallback
+ */
 "use client";
 
 import { useEffect, useMemo } from "react";

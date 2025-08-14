@@ -1,3 +1,8 @@
+/**
+ * ChartContainer
+ * - Lazy mounts recharts ResponsiveContainer to avoid SSR issues and keep bundle light
+ * - Wrap heavy chart code inside this container
+ */
 "use client";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";

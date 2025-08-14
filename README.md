@@ -39,13 +39,28 @@ Deploy on Vercel. The repo is Vercel-ready; import and deploy. Add a custom doma
 
 ### Structure
 
-See `app/` for pages and layouts. Calculator logic lives in `lib/calc/*` as pure functions returning totals and time-series for charts and CSV.
+See `app/` for pages and layouts. Calculator logic lives in `lib/calc/*` as pure functions returning totals and time-series for charts and CSV. UI and logic stay separated for readability and testing.
+
+Key folders:
+
+- `lib/calc/*`: pure TypeScript math (EMI, SIP, Lumpsum, Goal, FD, NPS, SWP, PPF, RD, IncomeTax)
+- `app/calculators/*`: UI pages using the calc functions, URL state sync, charts, content/FAQ
+- `components/*`: reusable UI (inputs, charts, share buttons)
 
 ### Add a Calculator
 
-1. Create `lib/calc/yourcalc.ts` with a typed function returning totals and series.
-2. Create `app/calculators/yourcalc/page.tsx` using `SliderWithInput`, `ResultStat`, and a Recharts graph in `ChartContainer`.
+1. Create `lib/calc/yourcalc.ts` with a typed function returning totals and series (no UI, no formatting). Add concise comments at the top describing inputs/outputs.
+2. Create `app/calculators/yourcalc/page.tsx` for UI. Keep state local, sync to URL via `useUrlState`, and reuse `SliderWithInput`, `ResultStat`, and `ChartContainer`.
 3. Add a card in `app/page.tsx`.
+4. Add tests in `tests/*` when adding new formulas.
+
+### Features
+
+- Calculators: EMI, SIP, Lumpsum, Goal Planner, FD, NPS, SWP, PPF, RD, Income Tax (simplified)
+- Combined Invest (SIP/Lumpsum) page
+- CSV export example (EMI)
+- Share via Web Share API and social shortcuts (WhatsApp/Twitter/Email)
+- Dark/Light theme, glassmorphism accents, lazy charts
 
 ### Formatting & Locale
 

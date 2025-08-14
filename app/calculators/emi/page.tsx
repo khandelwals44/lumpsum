@@ -1,3 +1,9 @@
+/**
+ * EMI Calculator Page (UI only)
+ * - Keeps state, inputs, charts, and table rendering here
+ * - Delegates all math to lib/calc/emi
+ * - Syncs URL for shareable state
+ */
 "use client";
 import { Suspense, useMemo, useState } from "react";
 import { calculateEmi } from "@/lib/calc/emi";
@@ -6,6 +12,7 @@ import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
+import { SocialShare } from "@/components/SocialShare";
 import { Area, AreaChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
 import { formatINR } from "@/lib/format";
@@ -61,7 +68,7 @@ function EmiClient() {
               max={480}
               step={1}
             />
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -73,6 +80,7 @@ function EmiClient() {
               >
                 Reset
               </button>
+              <SocialShare />
             </div>
           </div>
         </div>
@@ -113,6 +121,45 @@ function EmiClient() {
           </ChartContainer>
         </div>
         <ExportTable schedule={result.schedule} />
+
+        {/* Educational content: what, how, steps, and FAQ */}
+        <article className="prose mt-4 dark:prose-invert">
+          <details open>
+            <summary>What is EMI?</summary>
+            <p>
+              EMI (Equated Monthly Instalment) is a fixed payment you make every month to repay a
+              loan. It includes both interest and principal components.
+            </p>
+          </details>
+          <details>
+            <summary>How it works (formula)</summary>
+            <p>
+              Monthly rate r = annual rate / 12 / 100. EMI = P × r × (1 + r)^n / ((1 + r)^n − 1)
+            </p>
+            <p>
+              Each month the interest is computed on the outstanding balance and the remaining goes
+              towards principal. The schedule above shows this breakup.
+            </p>
+          </details>
+          <details>
+            <summary>How to use this calculator</summary>
+            <ol>
+              <li>Enter loan amount, annual interest rate, and tenure in months.</li>
+              <li>Use the sliders for quick adjustments.</li>
+              <li>Share the URL to send your scenario to others.</li>
+            </ol>
+          </details>
+          <details>
+            <summary>FAQs</summary>
+            <ul>
+              <li>Can I prepay? Yes—prepayment reduces balance and total interest.</li>
+              <li>Why does EMI change at zero rate? At 0%, EMI is simply principal/tenure.</li>
+              <li>
+                Is processing fee included? Not in this calculator; add it to principal if needed.
+              </li>
+            </ul>
+          </details>
+        </article>
       </section>
     </div>
   );

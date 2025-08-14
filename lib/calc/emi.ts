@@ -1,3 +1,10 @@
+/**
+ * EMI calculator
+ * Inputs: principal (₹), annual rate %, tenure months
+ * Returns: EMI amount, totals, and an amortization schedule for charts/tables
+ *
+ * Keep this file pure (no UI or formatting). This helps testing and reuse.
+ */
 export interface EmiPoint {
   month: number;
   principal: number;

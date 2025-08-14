@@ -6,6 +6,8 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AnalyticsSlot } from "@/components/Analytics";
 import { RegisterSW } from "@/components/RegisterSW";
+import { AuthButtons } from "@/components/AuthButtons";
+import { ClientSession } from "@/components/ClientSession";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -71,42 +73,50 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <header className="sticky top-0 z-40 w-full border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
-            <div className="container flex h-14 items-center justify-between">
-              <Link href="/" className="font-semibold">
-                lumpsum.in
-              </Link>
-              <nav className="flex items-center gap-3">
-                <Link
-                  href="/about"
-                  className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
-                >
-                  About
+          <ClientSession>
+            <header className="sticky top-0 z-40 w-full border-b border-zinc-200 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50 dark:border-zinc-800 dark:bg-zinc-950/40">
+              <div className="container flex h-14 items-center justify-between">
+                <Link href="/" className="font-semibold">
+                  lumpsum.in
                 </Link>
-                <a
-                  href="https://github.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
-                >
-                  GitHub
-                </a>
-                <ThemeToggle />
-              </nav>
-            </div>
-          </header>
-          <main className="container py-8">{children}</main>
-          <footer className="border-t border-zinc-200 py-8 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
-            <div className="container flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <p>© {new Date().getFullYear()} lumpsum.in</p>
-              <p className="max-w-2xl">
-                Disclaimer: This site provides calculators for educational purposes only and does
-                not constitute investment advice.
-              </p>
-            </div>
-          </footer>
-          <AnalyticsSlot />
-          <RegisterSW />
+                <nav className="flex items-center gap-3">
+                  <Link
+                    href="/about"
+                    className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+                  >
+                    About
+                  </Link>
+                  <a
+                    href="https://github.com/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+                  >
+                    GitHub
+                  </a>
+                  <AuthButtons />
+                  <ThemeToggle />
+                </nav>
+              </div>
+            </header>
+            <main className="container py-8">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-indigo-200/40 via-transparent to-violet-200/40 dark:from-indigo-500/10 dark:to-fuchsia-500/10" />
+                {children}
+              </div>
+            </main>
+            <footer className="border-t border-zinc-200 py-8 text-sm text-zinc-600 dark:border-zinc-800 dark:text-zinc-300">
+              <div className="container flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <p>© {new Date().getFullYear()} lumpsum.in</p>
+                <p className="max-w-2xl">
+                  Disclaimer: This site provides calculators for educational purposes only and does
+                  not constitute investment advice.
+                </p>
+              </div>
+            </footer>
+            <AnalyticsSlot />
+            <RegisterSW />
+          </ClientSession>
         </ThemeProvider>
       </body>
     </html>

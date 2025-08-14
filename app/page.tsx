@@ -18,6 +18,11 @@ const calculators = [
     description: "Future value of lumpsum investment"
   },
   {
+    href: "/calculators/invest",
+    title: "Invest (SIP / Lumpsum)",
+    description: "Compare SIP vs one-time"
+  },
+  {
     href: "/calculators/goal-planner",
     title: "Goal Planner",
     description: "Inflation-adjusted goal with required SIP/Lumpsum"
@@ -31,7 +36,20 @@ const calculators = [
     href: "/calculators/nps",
     title: "NPS Calculator",
     description: "NPS corpus and pension estimate"
-  }
+  },
+  {
+    href: "/calculators/ppf",
+    title: "PPF Calculator",
+    description: "Public Provident Fund maturity"
+  },
+  { href: "/calculators/rd", title: "RD Calculator", description: "Recurring Deposit maturity" },
+  { href: "/calculators/swp", title: "SWP Calculator", description: "Systematic Withdrawal Plan" },
+  {
+    href: "/calculators/income-tax",
+    title: "Income Tax (New Regime)",
+    description: "Simplified illustration"
+  },
+  { href: "/calculators/step-up-sip", title: "Step-up SIP", description: "Increase SIP every year" }
 ];
 
 export default function HomePage() {

@@ -1,15 +1,15 @@
-/** Number and currency formatting helpers for en-IN */
+/** Number and currency formatting helpers for en-IN (safe 1-decimal). */
 
-export const formatINR = (value: number, options: Intl.NumberFormatOptions = {}) =>
+export const formatINR = (value: number) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0,
-    ...options
+    maximumFractionDigits: 1,
+    minimumFractionDigits: 1
   }).format(isFinite(value) ? value : 0);
 
-export const formatNumber = (value: number, options: Intl.NumberFormatOptions = {}) =>
-  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2, ...options }).format(
+export const formatNumber = (value: number) =>
+  new Intl.NumberFormat("en-IN", { maximumFractionDigits: 1, minimumFractionDigits: 1 }).format(
     isFinite(value) ? value : 0
   );
 

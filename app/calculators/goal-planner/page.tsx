@@ -1,3 +1,7 @@
+/**
+ * Goal Planner (UI only)
+ * - Computes inflation-adjusted goal and required SIP/Lumpsum via lib/calc/goal
+ */
 "use client";
 import { Suspense, useMemo, useState } from "react";
 import { calculateGoal } from "@/lib/calc/goal";

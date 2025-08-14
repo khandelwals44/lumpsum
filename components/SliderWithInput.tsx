@@ -1,3 +1,8 @@
+/**
+ * SliderWithInput
+ * - Renders a numeric input and a synchronized range slider
+ * - Keeps validation minimal; clamping/guards should happen in calc layer where needed
+ */
 "use client";
 import { NumberInput } from "./NumberInput";
 

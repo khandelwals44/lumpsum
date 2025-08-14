@@ -1,3 +1,7 @@
+/**
+ * NPS Calculator (UI only)
+ * - Accumulation via SIP math in lib/calc/nps and simple annuity estimate
+ */
 "use client";
 import { Suspense, useMemo, useState } from "react";
 import { calculateNps } from "@/lib/calc/nps";

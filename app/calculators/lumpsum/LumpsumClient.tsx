@@ -1,9 +1,5 @@
-/**
- * Lumpsum Calculator Page (UI only)
- * - Delegates FV math to lib/calc/lumpsum
- */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { calculateLumpsum } from "@/lib/calc/lumpsum";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
@@ -16,25 +12,19 @@ import { parseParamNumber, useUrlState } from "@/lib/url";
 import { useSearchParams } from "next/navigation";
 import { SocialShare } from "@/components/SocialShare";
 import { FadeIn } from "@/components/FadeIn";
-
-export default function LumpsumPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="h-80 w-full animate-pulse rounded-md bg-zinc-100 dark:bg-zinc-900" />
-      }
-    >
-      <LumpsumClient />
-    </Suspense>
-  );
-}
-
-function LumpsumClient() {
+import Link from "next/link";
+import { saveLocal, loadLocal } from "@/lib/persist";
+import { Calculation, SavedCalculation } from "@/lib/types";
+import { v4 as uuidv4 } from "uuid";
+import { CalendarPlus } from "lucide-react";
+export default function LumpsumClient() {
   const sp = useSearchParams();
   const [principal, setPrincipal] = useState(parseParamNumber(sp, "p", 500000));
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 12));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 10));
   useUrlState({ p: principal, r: rate, y: years });
+
+  const STORAGE_KEY = "savedCalculations"; // Define STORAGE_KEY
 
   const result = useMemo(() => calculateLumpsum(principal, rate, years), [principal, rate, years]);
 
@@ -85,6 +75,59 @@ function LumpsumClient() {
               Reset
             </button>
             <SocialShare />
+            <button
+              type="button"
+              onClick={() => {
+                const newCalculation: Calculation = {
+                  type: "lumpsum",
+                  inputs: { principal, rate, years },
+                  results: { futureValue: result.futureValue, gains: result.gains },
+                  timestamp: Date.now()
+                };
+                const savedCalculations = loadLocal<SavedCalculation[]>(STORAGE_KEY, []);
+                saveLocal(STORAGE_KEY, [...savedCalculations, { ...newCalculation, id: uuidv4() }]);
+                alert("Calculation saved!");
+              }}
+              className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+            >
+              Save Calculation
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const title = `Lumpsum Investment Reminder: ₹${principal}`;
+                const description = `One-time lumpsum investment of ₹${principal} for ${years} years with expected ${rate}% return.`;
+                const date = new Date();
+                const isoDate = date.toISOString().replace(/-|:|\.\d{3}/g, "");
+                const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&details=${encodeURIComponent(description)}&dates=${isoDate}/${isoDate}`; // One-time event
+                window.open(url, "_blank");
+              }}
+              className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900 flex items-center gap-2 mt-2"
+            >
+              <CalendarPlus className="h-4 w-4" />
+              Add to Calendar
+            </button>
+          </div>
+          <div className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+            <p>Looking for something else?</p>
+            <ul className="mt-2 list-inside list-disc">
+              <li>
+                <Link
+                  href="/calculators/sip"
+                  className="text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  Calculate SIP instead
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/calculators/invest"
+                  className="text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  Compare Lumpsum vs SIP
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">

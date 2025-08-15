@@ -5,7 +5,7 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/health": {
+    "/health": {
       "get": {
         "summary": "Health check",
         "responses": {
@@ -13,6 +13,48 @@
             "description": "OK",
             "content": { "application/json": { "schema": { "type": "object" } } }
           }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login with email and password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "email": { "type": "string" }, "password": { "type": "string" } },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tokens returned" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Rotate refresh token and issue new access token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "refresh": { "type": "string" } },
+                "required": ["refresh"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "New tokens returned" },
+          "401": { "description": "Invalid refresh token" }
         }
       }
     },

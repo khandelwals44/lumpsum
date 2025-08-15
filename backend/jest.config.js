@@ -8,6 +8,9 @@ export default {
   moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json"],
   roots: ["<rootDir>/src", "<rootDir>/tests"],
   extensionsToTreatAsEsm: [".ts"],
+  moduleNameMapper: {
+    "^@prisma/client$": "<rootDir>/tests/prismaMock.ts"
+  },
   transformIgnorePatterns: ["/node_modules/"],
   collectCoverageFrom: ["src/**/*.ts", "!src/index.ts"]
 };

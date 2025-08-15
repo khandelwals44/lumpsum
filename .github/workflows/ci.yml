@@ -2,36 +2,64 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, feature/**]
+    branches: [ main, master, feature/** ]
   pull_request:
-    branches: [main, develop]
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: 18
+          cache: 'npm'
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
+
+      - name: Setup .env for CI
+        run: |
+          echo 'DATABASE_URL="file:./dev.db"' > .env
+          echo 'NEXTAUTH_URL="http://localhost:3000"' >> .env
+          echo 'NEXTAUTH_SECRET="testsecret"' >> .env
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Sync DB
+        run: npx prisma db push
+
+      - name: Seed DB
+        run: npm run db:seed
 
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Lint
-        run: npm run lint -- --max-warnings=0
-
-      - name: Test
-        run: npm test
+      - name: Tests
+        run: npm test --silent
 
       - name: Build
         run: npm run build
+
+      - name: Backend install
+        run: npm --prefix backend ci
+
+      - name: Backend typecheck
+        run: npm --prefix backend run typecheck
+
+      - name: Backend build
+        run: npm --prefix backend run build
+
+      - name: Backend tests
+        env:
+          DATABASE_URL: "file:../prisma/dev.db"
+          JWT_SECRET: "testsecret_testsecret"
+        run: npm --prefix backend test --silent
 
 

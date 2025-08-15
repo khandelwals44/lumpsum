@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,12 +10,32 @@ import Link from "next/link";
 
 export default function SignInClient() {
   const sp = useSearchParams();
+  const router = useRouter();
+  const { status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const callbackUrl = sp?.get("callbackUrl") ?? "/dashboard";
+  const target = sp?.get("callbackUrl") || "/dashboard";
+  const callbackUrl = useMemo(() => {
+    const base =
+      typeof window !== "undefined" ? window.location.origin : process.env.NEXTAUTH_URL || "";
+    try {
+      // eslint-disable-next-line no-new
+      new URL(target);
+      return target;
+    } catch {
+      return base ? `${base}${target}` : target;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
+
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.replace("/dashboard");
+    }
+  }, [status, router]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,14 +45,21 @@ export default function SignInClient() {
       email,
       password,
       callbackUrl,
-      redirect: false
+      redirect: true
     });
+    // When redirect:true, NextAuth navigates; no further code needed
     setLoading(false);
-    if (!res || res.error) {
-      setError("Invalid email or password. Please try again.");
-      return;
+    if (res === null) {
+      // If NextAuth didn't navigate and returned null, show a generic error
+      setError("Sign in failed. Please try again.");
     }
-    window.location.href = res.url || callbackUrl;
+  };
+
+  const onGoogle = async () => {
+    setError(null);
+    setLoading(true);
+    await signIn("google", { callbackUrl, redirect: true });
+    setLoading(false);
   };
 
   return (
@@ -77,11 +104,7 @@ export default function SignInClient() {
             </Button>
           </form>
           <div className="my-4 text-center text-sm text-zinc-500">or</div>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => signIn("google", { callbackUrl })}
-          >
+          <Button variant="outline" className="w-full" onClick={onGoogle} disabled={loading}>
             Continue with Google
           </Button>
           <p className="mt-4 text-center text-sm">

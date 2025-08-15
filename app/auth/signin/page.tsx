@@ -3,7 +3,7 @@ import SignInClient from "@/components/auth/SignInClient";
 
 export default function Page() {
   return (
-    <Suspense>
+    <Suspense fallback={<div />}>
       <SignInClient />
     </Suspense>
   );

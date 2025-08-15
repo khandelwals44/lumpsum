@@ -44,6 +44,7 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
+  role          String    @default("USER")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -51,6 +52,7 @@ model User {
   sessions      Session[]
   profile       UserProfile?
   goals         InvestmentGoal[]
+  holdings      PortfolioHolding[]
 }
 
 model VerificationToken {
@@ -66,7 +68,10 @@ model UserProfile {
   userId                String   @unique
   age                   Int
   gender                String
+  phone                 String?
   income                Float
+  expenses              Float     @default(0)
+  currentInvestments    Float     @default(0)
   location              String
   riskAppetite          String
   currentPortfolioValue Float
@@ -88,42 +93,43 @@ model InvestmentGoal {
   monthlyContribution       Float
   projectedValue            Float
   requiredMonthlyInvestment Float
+  deadline                  DateTime?
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 
-  user              User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assetAllocation   AssetAllocation?
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assetAllocation     AssetAllocation?
   fundRecommendations FundRecommendation[]
 }
 
 model AssetAllocation {
-  id                String @id @default(cuid())
-  goalId            String @unique
-  equity            Float
-  debt              Float
-  hybrid            Float
-  gold              Float
-  international     Float
+  id            String @id @default(cuid())
+  goalId        String @unique
+  equity        Float
+  debt          Float
+  hybrid        Float
+  gold          Float
+  international Float
 
   goal InvestmentGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
 }
 
 model FundRecommendation {
-  id           String @id @default(cuid())
-  goalId       String
-  fundId       String
-  fundName     String
-  category     String
-  allocation   Float
-  reason       String
-  riskLevel    String
-  expenseRatio Float
-  nav          Float
-  fundSize     Float
-  minInvestment Float
-  oneYearReturn Float
+  id              String @id @default(cuid())
+  goalId          String
+  fundId          String
+  fundName        String
+  category        String
+  allocation      Float
+  reason          String
+  riskLevel       String
+  expenseRatio    Float
+  nav             Float
+  fundSize        Float
+  minInvestment   Float
+  oneYearReturn   Float
   threeYearReturn Float
-  fiveYearReturn Float
+  fiveYearReturn  Float
 
   goal InvestmentGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
 }
@@ -148,4 +154,17 @@ model MutualFund {
   fiveYearReturn Float?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model PortfolioHolding {
+  id        String  @id @default(cuid())
+  userId    String
+  fundId    String
+  units     Float   @default(0)
+  avgCost   Float   @default(0)
+  sipAmount Float   @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

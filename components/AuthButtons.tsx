@@ -2,14 +2,19 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 
 export function AuthButtons() {
-  const { status } = useSession();
+  const { data, status } = useSession();
   const isAuthed = status === "authenticated";
+  const role = (data?.user as any)?.role as string | undefined;
+
+  const dashboardHref =
+    role === "ADMIN" ? "/dashboard" : role === "SUBADMIN" ? "/dashboard" : "/dashboard";
+
   return (
     <div className="flex items-center gap-2">
       {isAuthed ? (
         <>
           <a
-            href="/dashboard"
+            href={dashboardHref}
             className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
           >
             Dashboard
@@ -22,12 +27,20 @@ export function AuthButtons() {
           </button>
         </>
       ) : (
-        <button
-          onClick={() => signIn()}
-          className="rounded-md border border-zinc-300 px-2 py-1 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
-        >
-          Login
-        </button>
+        <>
+          <a
+            href="/auth/signin"
+            className="rounded-md border border-zinc-300 px-2 py-1 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+          >
+            Login
+          </a>
+          <a
+            href="/auth/signup"
+            className="rounded-md border border-zinc-300 px-2 py-1 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+          >
+            Sign Up
+          </a>
+        </>
       )}
     </div>
   );

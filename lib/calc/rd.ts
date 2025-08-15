@@ -2,12 +2,19 @@
  * Recurring Deposit (RD) calculator
  * - Monthly deposit grows at fixed rate with compounding monthly
  */
+
+/**
+ * A datapoint for the RD time series.
+ */
 export interface RdPoint {
   month: number;
   invested: number;
   value: number;
 }
 
+/**
+ * Results of an RD calculation.
+ */
 export interface RdResult {
   maturity: number;
   totalInvested: number;
@@ -15,6 +22,13 @@ export interface RdResult {
   series: RdPoint[];
 }
 
+/**
+ * Calculate future value of a recurring deposit.
+ * @param monthlyDeposit amount deposited each month
+ * @param annualRatePct annual interest rate in percent
+ * @param years investment period in years
+ * @returns maturity value, total invested, interest earned, and monthly time series
+ */
 export function calculateRd(
   monthlyDeposit: number,
   annualRatePct: number,

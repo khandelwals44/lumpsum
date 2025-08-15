@@ -3,12 +3,19 @@
  * - Annual contribution (we model monthly for smooth charts)
  * - Interest is declared annually; we approximate monthly accrual at R/12
  */
+
+/**
+ * A single datapoint in the PPF time series.
+ */
 export interface PpfPoint {
   month: number;
   invested: number;
   value: number;
 }
 
+/**
+ * The calculated results returned by the PPF calculator.
+ */
 export interface PpfResult {
   maturity: number;
   totalInvested: number;
@@ -16,6 +23,13 @@ export interface PpfResult {
   series: PpfPoint[];
 }
 
+/**
+ * Calculate future value of PPF with monthly contributions.
+ * @param monthlyContribution amount contributed each month (>= 0)
+ * @param annualRatePct PPF interest rate in percent (e.g. 7.1)
+ * @param years total duration in years (>= 0)
+ * @returns maturity value, total invested, gains, and monthly time series
+ */
 export function calculatePpf(
   monthlyContribution: number,
   annualRatePct: number,

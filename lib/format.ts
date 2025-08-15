@@ -1,4 +1,6 @@
-/** Number and currency formatting helpers for en-IN (safe 1-decimal). */
+/**
+ * Number and currency formatting helpers for en-IN (safe 1 decimal place)
+ */
 
 export const formatINR = (value: number) =>
   new Intl.NumberFormat("en-IN", {
@@ -13,6 +15,11 @@ export const formatNumber = (value: number) =>
     isFinite(value) ? value : 0
   );
 
+/**
+ * Convert an array of objects to CSV text.
+ * @param rows array of homogenous objects
+ * @returns CSV string with header row
+ */
 export function toCsv<T extends Record<string, unknown>>(rows: T[]): string {
   if (!rows || rows.length === 0) return "";
   const first = rows[0] as Record<string, unknown>;

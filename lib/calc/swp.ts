@@ -3,6 +3,10 @@
  * - Start with an initial corpus and withdraw a fixed amount each month
  * - Apply monthly growth on the remaining balance
  */
+
+/**
+ * A datapoint for the SWP time series.
+ */
 export interface SwpPoint {
   month: number;
   withdrawal: number;
@@ -10,6 +14,9 @@ export interface SwpPoint {
   balance: number;
 }
 
+/**
+ * Results of an SWP calculation.
+ */
 export interface SwpResult {
   monthsSurvived: number;
   totalWithdrawn: number;
@@ -18,6 +25,14 @@ export interface SwpResult {
   series: SwpPoint[];
 }
 
+/**
+ * Calculate SWP projection with monthly withdrawals.
+ * @param initialCorpus starting investment amount
+ * @param monthlyWithdrawal amount to withdraw each month
+ * @param annualReturnPct expected annual return in percent
+ * @param years maximum projection period in years
+ * @returns months survived, total withdrawn, total interest, ending balance, and monthly timeline
+ */
 export function calculateSwp(
   initialCorpus: number,
   monthlyWithdrawal: number,

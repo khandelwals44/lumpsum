@@ -99,14 +99,18 @@ export default function HomePage() {
             optimize your portfolio, and achieve your financial dreams with confidence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8 py-4">
-              <User className="w-5 h-5 mr-2" />
-              Start Your Journey
-              <ArrowRight className="w-5 h-5 ml-2" />
+            <Button asChild size="lg" className="text-lg px-8 py-4">
+              <Link href="/onboarding" aria-label="Start your journey to personalized planning">
+                <User className="w-5 h-5 mr-2" />
+                Start Your Journey
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4">
-              <Calculator className="w-5 h-5 mr-2" />
-              Try Calculators
+            <Button asChild variant="outline" size="lg" className="text-lg px-8 py-4">
+              <Link href="/calculators" aria-label="Open calculators">
+                <Calculator className="w-5 h-5 mr-2" />
+                Try Calculators
+              </Link>
             </Button>
           </div>
         </motion.div>
@@ -173,17 +177,22 @@ export default function HomePage() {
             intelligent recommendation platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
-              <Zap className="w-5 h-5 mr-2" />
-              Get Started Free
+            <Button asChild size="lg" variant="secondary" className="text-lg px-8 py-4">
+              <Link href="/auth/signup" aria-label="Get started for free">
+                <Zap className="w-5 h-5 mr-2" />
+                Get Started Free
+              </Link>
             </Button>
             <Button
+              asChild
               size="lg"
               variant="outline"
               className="text-lg px-8 py-4 border-white text-white hover:bg-white hover:text-blue-600"
             >
-              <BarChart3 className="w-5 h-5 mr-2" />
-              View Dashboard
+              <Link href="/dashboard" aria-label="Go to your dashboard">
+                <BarChart3 className="w-5 h-5 mr-2" />
+                View Dashboard
+              </Link>
             </Button>
           </div>
         </div>
@@ -252,9 +261,11 @@ export default function HomePage() {
                   Start with our comprehensive onboarding process. We&apos;ll assess your risk
                   profile and create a personalized investment plan.
                 </p>
-                <Button size="lg" className="w-full">
-                  <ArrowRight className="w-5 h-5 mr-2" />
-                  Start Onboarding
+                <Button asChild size="lg" className="w-full">
+                  <Link href="/onboarding" aria-label="Start onboarding">
+                    <ArrowRight className="w-5 h-5 mr-2" />
+                    Start Onboarding
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -275,9 +286,11 @@ export default function HomePage() {
                   Jump straight to your personalized dashboard to track your progress and get fund
                   recommendations.
                 </p>
-                <Button size="lg" variant="outline" className="w-full">
-                  <ArrowRight className="w-5 h-5 mr-2" />
-                  Go to Dashboard
+                <Button asChild size="lg" variant="outline" className="w-full">
+                  <Link href="/dashboard" aria-label="Go to dashboard">
+                    <ArrowRight className="w-5 h-5 mr-2" />
+                    Go to Dashboard
+                  </Link>
                 </Button>
               </CardContent>
             </Card>

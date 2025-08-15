@@ -4,15 +4,27 @@
  * Returns annualized rate in percent.
  */
 
+/**
+ * A single cash flow entry with date and amount.
+ */
 export interface CashFlow {
   date: Date;
   amount: number;
 }
 
+/**
+ * Calculate days between two dates.
+ */
 function daysBetween(a: Date, b: Date): number {
   return (a.getTime() - b.getTime()) / (1000 * 60 * 60 * 24);
 }
 
+/**
+ * Calculate XIRR (Extended Internal Rate of Return) using Newton-Raphson method.
+ * @param cashflows array of cash flows with dates and amounts
+ * @param guessPct initial guess for the rate in percent (default: 10)
+ * @returns annualized rate in percent
+ */
 export function xirr(cashflows: CashFlow[], guessPct = 10): number {
   if (cashflows.length < 2) return 0;
   const cf = cashflows.slice().sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -46,6 +58,9 @@ export function xirr(cashflows: CashFlow[], guessPct = 10): number {
 /**
  * Parse cashflows from a compact URL param, e.g.
  * cf=2024-01-01:-100000|2024-12-31:112000
+ * @param sp URLSearchParams or similar object
+ * @param key parameter name to look for
+ * @returns array of parsed cash flows
  */
 export function parseParamCashflows(
   sp: URLSearchParams | { get: (k: string) => string | null } | null,

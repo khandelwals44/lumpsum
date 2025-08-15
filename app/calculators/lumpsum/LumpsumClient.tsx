@@ -16,6 +16,7 @@ import Link from "next/link";
 import { saveLocal, loadLocal } from "@/lib/persist";
 import { Calculation, SavedCalculation } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
+import { Api, getAuthToken } from "@/lib/api";
 import { CalendarPlus } from "lucide-react";
 export default function LumpsumClient() {
   const sp = useSearchParams();
@@ -86,6 +87,13 @@ export default function LumpsumClient() {
                 };
                 const savedCalculations = loadLocal<SavedCalculation[]>(STORAGE_KEY, []);
                 saveLocal(STORAGE_KEY, [...savedCalculations, { ...newCalculation, id: uuidv4() }]);
+                if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+                  Api.saveCalculation(
+                    newCalculation.type,
+                    newCalculation.inputs,
+                    newCalculation.results
+                  ).catch(() => {});
+                }
                 alert("Calculation saved!");
               }}
               className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"

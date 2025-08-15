@@ -1,14 +1,22 @@
+/** A datapoint for the lump sum time series */
 export interface LumpsumPoint {
   month: number;
   value: number;
 }
 
+/** Results of a lump sum calculation */
 export interface LumpsumResult {
   futureValue: number;
   gains: number;
   series: LumpsumPoint[];
 }
 
+/**
+ * Calculate future value of a one-time investment with monthly compounding.
+ * @param principal initial amount invested
+ * @param annualReturnPct expected annual return in percent
+ * @param years investment horizon in years
+ */
 export function calculateLumpsum(
   principal: number,
   annualReturnPct: number,

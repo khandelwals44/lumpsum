@@ -8,6 +8,10 @@
 import { useEffect, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
+/**
+ * Sync a subset of component state into the URL query string.
+ * Keeps the URL shareable without reloading the page.
+ */
 export function useUrlState<T extends Record<string, string | number | undefined>>(state: T) {
   const sp = useSearchParams();
   const router = useRouter();
@@ -33,6 +37,9 @@ export function useUrlState<T extends Record<string, string | number | undefined
   }, [JSON.stringify(state), path]);
 }
 
+/**
+ * Safely parse a number from URLSearchParams with fallback.
+ */
 export function parseParamNumber(
   sp: URLSearchParams | { get: (key: string) => string | null } | null,
   key: string,

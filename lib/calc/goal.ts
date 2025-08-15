@@ -1,8 +1,14 @@
+/**
+ * A datapoint showing required corpus at each month.
+ */
 export interface GoalPoint {
   month: number;
   requiredCorpus: number;
 }
 
+/**
+ * Results of a goal planning calculation.
+ */
 export interface GoalResult {
   inflatedGoal: number;
   requiredSIP: number;
@@ -10,6 +16,14 @@ export interface GoalResult {
   series: GoalPoint[];
 }
 
+/**
+ * Calculate required investments to reach a financial goal.
+ * @param goalToday target amount needed today
+ * @param years time horizon in years
+ * @param inflationPct expected annual inflation rate in percent
+ * @param annualReturnPct expected annual investment return in percent
+ * @returns inflated goal amount, required monthly SIP, required lumpsum, and corpus timeline
+ */
 export function calculateGoal(
   goalToday: number,
   years: number,

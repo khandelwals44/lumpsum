@@ -78,6 +78,29 @@ EMI amortization table includes an Export CSV button example. Use `toCsv` in `li
 
 Add your analytics snippet inside the root layout where indicated (e.g., GA4). No keys are committed.
 
+### Logging & Debugging
+
+Frontend
+
+- Start: `npm run dev` (http://localhost:3000)
+- Check DevTools Network/Console for API errors and warnings
+- Typecheck: `npm run typecheck`; Tests: `npm test`
+- If dev build is odd: stop server, delete `.next`, restart
+
+Backend
+
+- Start: `npm --prefix backend run dev` (http://localhost:4000)
+- Env: `backend/.env` with `DATABASE_URL`, `JWT_SECRET`, `PORT`
+- Health: `GET /health`; Swagger: `/docs`
+- Logs: Pino JSON output; look for `"level"` and message
+- Tests: `npm --prefix backend test`
+
+Auth tips
+
+- 401 on protected routes: set `Authorization: Bearer <access>` header
+- Refresh flow: call `/auth/refresh` with `{ refresh }` when 401 occurs, then retry with new access
+- SQLite locked: close other apps using the file; re-run
+
 ### Accessibility
 
 Keyboard-friendly controls, focus rings, sufficient contrast, and semantic markup.

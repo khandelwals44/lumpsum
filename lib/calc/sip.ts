@@ -1,9 +1,15 @@
+/**
+ * A single datapoint in the SIP time series.
+ */
 export interface SipPoint {
   month: number;
   invested: number;
   value: number;
 }
 
+/**
+ * The calculated results returned by the SIP calculator.
+ */
 export interface SipResult {
   maturity: number;
   totalInvested: number;
@@ -11,7 +17,13 @@ export interface SipResult {
   series: SipPoint[];
 }
 
-/** Monthly SIP with monthly compounding */
+/**
+ * Calculate future value of a monthly SIP with monthly compounding.
+ * @param monthlyInvestment amount invested each month (>= 0)
+ * @param annualReturnPct expected annual return in percent (e.g. 12)
+ * @param years total duration in years (>= 0)
+ * @returns maturity, total invested, gains, and monthly time series
+ */
 export function calculateSip(
   monthlyInvestment: number,
   annualReturnPct: number,

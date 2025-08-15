@@ -3,10 +3,17 @@
  * NOTE: This is a simplified slab model for educational purposes. Always verify with official rules.
  */
 
+/**
+ * Tax calculation for a single income slab.
+ */
 export interface TaxBreakup {
   slab: string;
   tax: number;
 }
+
+/**
+ * Results of an income tax calculation.
+ */
 export interface TaxResult {
   taxableIncome: number;
   taxPayable: number;
@@ -15,6 +22,12 @@ export interface TaxResult {
   breakup: TaxBreakup[];
 }
 
+/**
+ * Calculate income tax under new regime (FY 2024-25).
+ * @param grossIncome total annual income
+ * @param deductions total deductions (default: 0 for new regime)
+ * @returns tax calculation with slab-wise breakdown
+ */
 export function calculateIncomeTaxNewRegime(
   grossIncome: number,
   deductions: number = 0

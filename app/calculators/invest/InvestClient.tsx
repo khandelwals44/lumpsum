@@ -14,6 +14,7 @@ import { formatINR } from "@/lib/format";
 import { FadeIn } from "@/components/FadeIn";
 import Link from "next/link";
 import { saveLocal, loadLocal } from "@/lib/persist";
+import { Api, getAuthToken } from "@/lib/api";
 import { Calculation, SavedCalculation, Mode } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 export default function InvestClient() {
@@ -145,6 +146,12 @@ export default function InvestClient() {
                 }
                 const savedCalculations = loadLocal<SavedCalculation[]>(STORAGE_KEY, []);
                 saveLocal(STORAGE_KEY, [...savedCalculations, { ...newCalculation, id: uuidv4() }]);
+                // If a backend token exists, also persist to backend history
+                if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+                  const inputs = newCalculation.inputs;
+                  const outputs = newCalculation.results as any;
+                  Api.saveCalculation(newCalculation.type, inputs, outputs).catch(() => {});
+                }
                 alert("Calculation saved!");
               }}
               className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"

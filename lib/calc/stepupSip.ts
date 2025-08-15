@@ -3,6 +3,10 @@
  * - Base monthly amount increases by stepUpPercent each year
  * - Compounding monthly at expected annual return
  */
+
+/**
+ * A datapoint for the step-up SIP time series.
+ */
 export interface StepUpSipPoint {
   month: number;
   invested: number;
@@ -10,6 +14,9 @@ export interface StepUpSipPoint {
   value: number;
 }
 
+/**
+ * Results of a step-up SIP calculation.
+ */
 export interface StepUpSipResult {
   maturity: number;
   totalInvested: number;
@@ -17,6 +24,14 @@ export interface StepUpSipResult {
   series: StepUpSipPoint[];
 }
 
+/**
+ * Calculate future value of a step-up SIP investment.
+ * @param baseMonthly initial monthly investment amount
+ * @param annualReturnPct expected annual return in percent
+ * @param years investment period in years
+ * @param stepUpPercentPerYear annual increase in contribution amount in percent
+ * @returns maturity value, total invested, gains, and monthly time series
+ */
 export function calculateStepUpSip(
   baseMonthly: number,
   annualReturnPct: number,

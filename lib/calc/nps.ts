@@ -1,15 +1,29 @@
+/**
+ * A datapoint for the NPS time series.
+ */
 export interface NpsPoint {
   month: number;
   invested: number;
   value: number;
 }
 
+/**
+ * Results of an NPS calculation.
+ */
 export interface NpsResult {
   corpus: number;
   estimatedPension: number;
   series: NpsPoint[];
 }
 
+/**
+ * Calculate NPS corpus and estimated monthly pension.
+ * @param monthlyContribution amount contributed each month
+ * @param years contribution period in years
+ * @param preRetAnnualReturnPct pre-retirement annual return in percent
+ * @param postRetAnnuityAnnualPct post-retirement annuity rate in percent
+ * @returns corpus, estimated monthly pension, and time series
+ */
 export function calculateNps(
   monthlyContribution: number,
   years: number,

@@ -18,6 +18,10 @@ import { useSearchParams } from "next/navigation";
 import { Timeframe, TimeframeToggle } from "@/components/TimeframeToggle";
 import { SocialShare } from "@/components/SocialShare";
 import { FadeIn } from "@/components/FadeIn";
+import { saveLocal, loadLocal } from "@/lib/persist";
+import { Calculation, SavedCalculation } from "@/lib/types";
+import { v4 as uuidv4 } from "uuid";
+import { Api, getAuthToken } from "@/lib/api";
 
 export default function SipPage() {
   return (
@@ -100,6 +104,37 @@ function SipClient() {
               Reset
             </button>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              const newCalculation: Calculation = {
+                type: "sip",
+                inputs: { amount, rate, years },
+                results: {
+                  maturity: result.maturity,
+                  totalInvested: result.totalInvested,
+                  gains: result.gains
+                },
+                timestamp: Date.now()
+              };
+              const savedCalculations = loadLocal<SavedCalculation[]>("savedCalculations", []);
+              saveLocal("savedCalculations", [
+                ...savedCalculations,
+                { ...newCalculation, id: uuidv4() }
+              ]);
+              if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+                Api.saveCalculation(
+                  newCalculation.type,
+                  newCalculation.inputs,
+                  newCalculation.results
+                ).catch(() => {});
+              }
+              alert("Calculation saved!");
+            }}
+            className="mt-2 rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+          >
+            Save Calculation
+          </button>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <ResultStat label="Maturity" value={result.maturity} currency />

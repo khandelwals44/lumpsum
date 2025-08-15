@@ -13,8 +13,8 @@ import rateLimit from "express-rate-limit";
 // @ts-ignore - no types
 import swaggerUi from "swagger-ui-express";
 import { createRequire } from "module";
-import { prisma } from "./prisma";
-import { signAccessToken, signRefreshToken, rotateRefreshToken, requireAuth } from "./auth";
+import { prisma } from "./prisma.js";
+import { signAccessToken, signRefreshToken, rotateRefreshToken, requireAuth } from "./auth.js";
 import bcrypt from "bcryptjs";
 
 /**

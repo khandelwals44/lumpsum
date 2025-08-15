@@ -7,8 +7,8 @@
  */
 import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
-import { Env } from "./env";
-import { prisma } from "./prisma";
+import { Env } from "./env.js";
+import { prisma } from "./prisma.js";
 
 /**
  * Shape of our JWT payload

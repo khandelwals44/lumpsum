@@ -54,11 +54,7 @@ providers.push(
         return null;
       }
 
-      return {
-        id: user.id,
-        email: user.email,
-        name: user.name
-      };
+      return { id: user.id, email: user.email, name: user.name, role: user.role } as any;
     }
   })
 );
@@ -70,17 +66,33 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60 // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account, profile }) {
       if (user) {
-        token.id = user.id;
+        token.id = (user as any).id;
+        token.role = (user as any).role ?? "USER";
+      }
+      // If logging in via OAuth, ensure role exists on DB
+      if (!token.role && token.email) {
+        const dbUser = await prisma.user.findUnique({ where: { email: token.email as string } });
+        token.role = dbUser?.role ?? "USER";
       }
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
+      if (session.user) {
         (session.user as any).id = token.id as string;
+        (session.user as any).role = (token.role as string) ?? "USER";
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // After sign in, send everyone to dashboard for now
+      const isRelative = url.startsWith("/");
+      const isSameHost = url.startsWith(baseUrl);
+      const target = "/dashboard";
+      if (isRelative) return target;
+      if (isSameHost) return target;
+      return baseUrl + target;
     }
   },
   pages: {

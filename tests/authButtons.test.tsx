@@ -1,5 +1,5 @@
 import React from "react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 // Import the component under test
@@ -27,7 +27,7 @@ describe("AuthButtons", () => {
 
   it("renders Login link when unauthenticated and points to /auth/signin", () => {
     // Arrange: mock useSession to simulate an unauthenticated user
-    (useSession as unknown as vi.Mock).mockReturnValue({ status: "unauthenticated" });
+    (useSession as unknown as Mock).mockReturnValue({ status: "unauthenticated" });
 
     // Act: render the component
     render(<AuthButtons />);
@@ -39,7 +39,7 @@ describe("AuthButtons", () => {
 
   it("renders Dashboard link and Logout button when authenticated; Logout triggers signOut", () => {
     // Arrange: mock useSession to simulate an authenticated user
-    (useSession as unknown as vi.Mock).mockReturnValue({
+    (useSession as unknown as Mock).mockReturnValue({
       status: "authenticated",
       data: { user: { role: "USER" } }
     });

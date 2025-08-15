@@ -6,15 +6,20 @@ export function AuthButtons() {
   const isAuthed = status === "authenticated";
   const role = (data?.user as any)?.role as string | undefined;
 
-  const dashboardHref =
-    role === "ADMIN" ? "/dashboard" : role === "SUBADMIN" ? "/dashboard" : "/dashboard";
-
   return (
     <div className="flex items-center gap-2">
       {isAuthed ? (
         <>
+          {role === "ADMIN" && (
+            <a
+              href="/admin"
+              className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
+            >
+              Admin
+            </a>
+          )}
           <a
-            href={dashboardHref}
+            href="/dashboard"
             className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white"
           >
             Dashboard

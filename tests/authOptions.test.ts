@@ -54,7 +54,7 @@ describe("authOptions callbacks", () => {
     const result = await callbacks!.session!({ session, token } as any);
 
     // Assert: user id and role are added onto the session for client consumption
-    expect(result.user.id).toBe("user_999");
+    expect((result.user as any).id).toBe("user_999");
     expect((result.user as any).role).toBe("SUBADMIN");
   });
 

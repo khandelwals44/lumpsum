@@ -93,3 +93,57 @@ GitHub Actions runs install, typecheck, lint, tests, and build on PRs.
 ### PWA
 
 Basic web manifest is present. Add a service worker if you want offline cache of calculator pages.
+
+## Production Setup (Backend + Frontend)
+
+- Frontend: Next.js app in this repo (see scripts). Env validated via `lib/env.ts`.
+- Backend: Express service under `backend/` with Swagger UI at `/docs`. Env validated via `backend/src/env.ts`.
+
+### Run locally
+
+- Frontend
+
+```
+npm i
+npm run dev
+```
+
+- Backend
+
+```
+cd backend
+npm i
+npm run dev
+```
+
+### Docker
+
+- Build and run
+
+```
+docker-compose up --build
+```
+
+### Health
+
+- Frontend: `GET /api/health`
+- Backend: `GET /health`
+
+### Swagger / API Docs
+
+- Backend Swagger UI: `http://localhost:4000/docs`
+- Raw OpenAPI: `docs/swagger.json`
+
+### CI/CD
+
+- GitHub Actions runs typecheck, tests, Prisma generate/db push/seed, and build.
+
+### Tests
+
+- Frontend: `npm test`
+- Backend: `cd backend && npm test`
+
+### Env
+
+- Frontend: `.env.local` with `DATABASE_URL`, `NEXTAUTH_*`, optional `NEXT_PUBLIC_API_BASE_URL` to call backend.
+- Backend: `.env` with `DATABASE_URL`, `JWT_SECRET`, `PORT`.

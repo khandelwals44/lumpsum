@@ -54,13 +54,34 @@ Key folders:
 3. Add a card in `app/page.tsx`.
 4. Add tests in `tests/*` when adding new formulas.
 
+### Learning Hub
+
+The Mutual Fund University provides comprehensive educational content:
+
+- **Chapters**: Structured learning content with sections, examples, and interactive elements
+- **Progress Tracking**: Automatic progress saving and time tracking
+- **Bookmarks**: Save important sections with personal notes
+- **Quizzes**: Interactive knowledge checks with explanations
+- **Badges**: Gamified achievements for completing milestones
+- **Categories**: Organized by level (Beginner, Intermediate, Advanced, Professional) and topic
+
+#### Add Learning Content
+
+1. **Seed Content**: Add chapters and quizzes to `prisma/seed-learning.ts`
+2. **Run Seed**: `npm run db:seed:learning`
+3. **API Routes**: Learning endpoints are in `app/api/learning/`
+4. **Components**: Main hub at `app/learning/`, individual chapters at `app/learning/chapter/[slug]/`
+
 ### Features
 
-- Calculators: EMI, SIP, Lumpsum, Goal Planner, FD, NPS, SWP, PPF, RD, Income Tax (simplified)
-- Combined Invest (SIP/Lumpsum) page
-- CSV export example (EMI)
-- Share via Web Share API and social shortcuts (WhatsApp/Twitter/Email)
-- Dark/Light theme, glassmorphism accents, lazy charts
+- **Calculators**: EMI, SIP, Lumpsum, Goal Planner, FD, NPS, SWP, PPF, RD, Income Tax (simplified)
+- **Combined Invest (SIP/Lumpsum) page**
+- **Mutual Fund University**: Complete learning hub with 100+ chapters covering beginner to professional levels
+- **Interactive Learning**: Progress tracking, bookmarks, quizzes, and gamified badges
+- **Investor & Distributor Guides**: Personalized investment plans and MFD training content
+- **CSV export example (EMI)**
+- **Share via Web Share API and social shortcuts (WhatsApp/Twitter/Email)**
+- **Dark/Light theme, glassmorphism accents, lazy charts**
 
 ### Formatting & Locale
 

@@ -96,6 +96,194 @@ export function createApp(): express.Express {
     res.json(created);
   });
 
+  // Learning Hub endpoints
+  app.get("/learning/chapters", async (req, res) => {
+    const { level, category } = req.query;
+    const where: any = { isActive: true };
+    if (level) where.level = level;
+    if (category) where.category = category;
+
+    const chapters = await prisma.learningChapter.findMany({
+      where,
+      orderBy: { order: "asc" },
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        description: true,
+        level: true,
+        category: true,
+        order: true,
+        estimatedTime: true
+      }
+    });
+    res.json(chapters);
+  });
+
+  app.get("/learning/content/:chapterId", async (req, res) => {
+    const { chapterId } = req.params;
+    const chapter = await prisma.learningChapter.findUnique({
+      where: { id: chapterId },
+      include: {
+        quizzes: {
+          where: { isActive: true },
+          orderBy: { order: "asc" },
+          select: {
+            id: true,
+            question: true,
+            options: true,
+            order: true
+          }
+        }
+      }
+    });
+    if (!chapter) return res.status(404).json({ message: "Chapter not found" });
+    res.json(chapter);
+  });
+
+  app.get("/learning/progress", requireAuth(["ADMIN", "SUBADMIN", "USER"]), async (req, res) => {
+    // @ts-ignore
+    const userId = req.user?.sub as string;
+    const progress = await prisma.userLearningProgress.findMany({
+      where: { userId },
+      include: {
+        chapter: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            level: true,
+            category: true
+          }
+        }
+      },
+      orderBy: { updatedAt: "desc" }
+    });
+    res.json(progress);
+  });
+
+  app.post(
+    "/learning/progress/save",
+    requireAuth(["ADMIN", "SUBADMIN", "USER"]),
+    async (req, res) => {
+      // @ts-ignore
+      const userId = req.user?.sub as string;
+      const { chapterId, progress, completed, timeSpent } = req.body || {};
+      if (!chapterId) return res.status(400).json({ message: "Missing chapterId" });
+
+      const updated = await prisma.userLearningProgress.upsert({
+        where: { userId_chapterId: { userId, chapterId } },
+        update: { progress, completed, timeSpent, lastAccessed: new Date() },
+        create: { userId, chapterId, progress, completed, timeSpent }
+      });
+      res.json(updated);
+    }
+  );
+
+  app.get("/learning/bookmarks", requireAuth(["ADMIN", "SUBADMIN", "USER"]), async (req, res) => {
+    // @ts-ignore
+    const userId = req.user?.sub as string;
+    const bookmarks = await prisma.userBookmark.findMany({
+      where: { userId },
+      include: {
+        chapter: {
+          select: {
+            id: true,
+            title: true,
+            slug: true
+          }
+        }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    res.json(bookmarks);
+  });
+
+  app.post("/learning/bookmarks", requireAuth(["ADMIN", "SUBADMIN", "USER"]), async (req, res) => {
+    // @ts-ignore
+    const userId = req.user?.sub as string;
+    const { chapterId, sectionId, note } = req.body || {};
+    if (!chapterId) return res.status(400).json({ message: "Missing chapterId" });
+
+    const bookmark = await prisma.userBookmark.create({
+      data: { userId, chapterId, sectionId, note }
+    });
+    res.json(bookmark);
+  });
+
+  app.delete(
+    "/learning/bookmarks/:id",
+    requireAuth(["ADMIN", "SUBADMIN", "USER"]),
+    async (req, res) => {
+      // @ts-ignore
+      const userId = req.user?.sub as string;
+      const { id } = req.params;
+
+      await prisma.userBookmark.deleteMany({
+        where: { id, userId }
+      });
+      res.json({ message: "Bookmark deleted" });
+    }
+  );
+
+  app.post(
+    "/learning/quiz/:quizId/answer",
+    requireAuth(["ADMIN", "SUBADMIN", "USER"]),
+    async (req, res) => {
+      // @ts-ignore
+      const userId = req.user?.sub as string;
+      const { quizId } = req.params;
+      const { answer } = req.body || {};
+
+      const quiz = await prisma.chapterQuiz.findUnique({ where: { id: quizId } });
+      if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+
+      const isCorrect = answer === quiz.correctAnswer;
+      const userAnswer = await prisma.userQuizAnswer.upsert({
+        where: { userId_quizId: { userId, quizId } },
+        update: { answer, isCorrect },
+        create: { userId, quizId, answer, isCorrect }
+      });
+
+      res.json({
+        isCorrect,
+        explanation: quiz.explanation,
+        correctAnswer: quiz.correctAnswer
+      });
+    }
+  );
+
+  app.get("/learning/badges", requireAuth(["ADMIN", "SUBADMIN", "USER"]), async (req, res) => {
+    // @ts-ignore
+    const userId = req.user?.sub as string;
+    const badges = await prisma.userBadge.findMany({
+      where: { userId },
+      orderBy: { earnedAt: "desc" }
+    });
+    res.json(badges);
+  });
+
+  app.post("/investor/guide", requireAuth(["ADMIN", "SUBADMIN", "USER"]), async (req, res) => {
+    // @ts-ignore
+    const userId = req.user?.sub as string;
+    const { title, content, goals, riskProfile, timeHorizon } = req.body || {};
+
+    const guide = await prisma.investorGuide.create({
+      data: { userId, title, content, goals, riskProfile, timeHorizon }
+    });
+    res.json(guide);
+  });
+
+  app.get("/investor/guides", requireAuth(["ADMIN", "SUBADMIN", "USER"]), async (req, res) => {
+    // @ts-ignore
+    const userId = req.user?.sub as string;
+    const guides = await prisma.investorGuide.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" }
+    });
+    res.json(guides);
+  });
+
   // Swagger UI
   try {
     const require = createRequire(import.meta.url);

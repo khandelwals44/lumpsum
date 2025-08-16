@@ -1,0 +1,720 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "lumpsum.in API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "type": "object" } } }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login with email and password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "email": { "type": "string" }, "password": { "type": "string" } },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tokens returned" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "summary": "Rotate refresh token and issue new access token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "refresh": { "type": "string" } },
+                "required": ["refresh"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "New tokens returned" },
+          "401": { "description": "Invalid refresh token" }
+        }
+      }
+    },
+    "/api/profile": {
+      "get": {
+        "summary": "Get profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserProfile" } }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "put": {
+        "summary": "Upsert profile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserProfile" } }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/goals": {
+      "get": {
+        "summary": "List goals",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/InvestmentGoal" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Create goal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/InvestmentGoal" } }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      },
+      "put": {
+        "summary": "Update goal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/InvestmentGoal" } }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      },
+      "delete": {
+        "summary": "Delete goal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "properties": { "id": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/holdings": {
+      "get": {
+        "summary": "List holdings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/PortfolioHolding" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Create holding",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PortfolioHolding" } }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      },
+      "put": {
+        "summary": "Update holding",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/PortfolioHolding" } }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      },
+      "delete": {
+        "summary": "Delete holding",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "properties": { "id": { "type": "string" } } }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/api/funds": {
+      "get": {
+        "summary": "Search funds",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "category", "in": "query", "schema": { "type": "string" } },
+          { "name": "subCategory", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MutualFund" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/calc-history": {
+      "get": {
+        "summary": "List calculation history (requires JWT)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/CalculationHistory" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Save a calculation (requires JWT)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "calcType": { "type": "string" },
+                  "inputJson": { "type": "string" },
+                  "outputJson": { "type": "string" }
+                },
+                "required": ["calcType", "inputJson", "outputJson"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" }, "401": { "description": "Unauthorized" } }
+      }
+    },
+    "/learning/chapters": {
+      "get": {
+        "summary": "List learning chapters",
+        "parameters": [
+          {
+            "name": "level",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED", "PROFESSIONAL"]
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["BASICS", "INVESTMENT", "DISTRIBUTOR", "RESEARCH"]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of chapters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/LearningChapter" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/learning/content/{chapterId}": {
+      "get": {
+        "summary": "Get chapter content with quizzes",
+        "parameters": [
+          { "name": "chapterId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chapter content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/LearningChapter" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "quizzes": {
+                          "type": "array",
+                          "items": { "$ref": "#/components/schemas/ChapterQuiz" }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": { "description": "Chapter not found" }
+        }
+      }
+    },
+    "/learning/progress": {
+      "get": {
+        "summary": "Get user learning progress (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User progress",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserLearningProgress" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/learning/progress/save": {
+      "post": {
+        "summary": "Save learning progress (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "chapterId": { "type": "string" },
+                  "progress": { "type": "number" },
+                  "completed": { "type": "boolean" },
+                  "timeSpent": { "type": "integer" }
+                },
+                "required": ["chapterId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Progress saved",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserLearningProgress" }
+              }
+            }
+          },
+          "400": { "description": "Missing chapterId" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/learning/bookmarks": {
+      "get": {
+        "summary": "Get user bookmarks (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User bookmarks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserBookmark" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "summary": "Create bookmark (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "chapterId": { "type": "string" },
+                  "sectionId": { "type": "string" },
+                  "note": { "type": "string" }
+                },
+                "required": ["chapterId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bookmark created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserBookmark" }
+              }
+            }
+          },
+          "400": { "description": "Missing chapterId" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/learning/bookmarks/{id}": {
+      "delete": {
+        "summary": "Delete bookmark (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Bookmark deleted" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/learning/quiz/{quizId}/answer": {
+      "post": {
+        "summary": "Submit quiz answer (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "quizId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "answer": { "type": "integer" }
+                },
+                "required": ["answer"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quiz result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isCorrect": { "type": "boolean" },
+                    "explanation": { "type": "string" },
+                    "correctAnswer": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Quiz not found" }
+        }
+      }
+    },
+    "/learning/badges": {
+      "get": {
+        "summary": "Get user badges (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User badges",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserBadge" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/investor/guide": {
+      "post": {
+        "summary": "Create investor guide (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "content": { "type": "string" },
+                  "goals": { "type": "string" },
+                  "riskProfile": { "type": "string" },
+                  "timeHorizon": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Guide created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InvestorGuide" }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/investor/guides": {
+      "get": {
+        "summary": "Get user investor guides (requires JWT)",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User guides",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/InvestorGuide" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserProfile": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "string" },
+          "age": { "type": "integer" },
+          "gender": { "type": "string" },
+          "phone": { "type": "string" },
+          "income": { "type": "number" },
+          "expenses": { "type": "number" },
+          "currentInvestments": { "type": "number" },
+          "location": { "type": "string" },
+          "riskAppetite": { "type": "string" },
+          "currentPortfolioValue": { "type": "number" }
+        }
+      },
+      "InvestmentGoal": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "name": { "type": "string" },
+          "targetAmount": { "type": "number" },
+          "timeHorizon": { "type": "integer" },
+          "priority": { "type": "string" },
+          "currentSavings": { "type": "number" },
+          "monthlyContribution": { "type": "number" },
+          "projectedValue": { "type": "number" },
+          "requiredMonthlyInvestment": { "type": "number" },
+          "deadline": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PortfolioHolding": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "fundId": { "type": "string" },
+          "units": { "type": "number" },
+          "avgCost": { "type": "number" },
+          "sipAmount": { "type": "number" }
+        }
+      },
+      "MutualFund": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "category": { "type": "string" },
+          "subCategory": { "type": "string" },
+          "assetClass": { "type": "string" },
+          "riskLevel": { "type": "string" },
+          "expenseRatio": { "type": "number" },
+          "nav": { "type": "number" },
+          "fundSize": { "type": "number" },
+          "minInvestment": { "type": "number" },
+          "benchmark": { "type": "string" },
+          "fundManager": { "type": "string" },
+          "inceptionDate": { "type": "string", "format": "date-time" },
+          "isActive": { "type": "boolean" },
+          "oneYearReturn": { "type": "number" },
+          "threeYearReturn": { "type": "number" },
+          "fiveYearReturn": { "type": "number" }
+        }
+      },
+      "CalculationHistory": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "calcType": { "type": "string" },
+          "inputJson": { "type": "string" },
+          "outputJson": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LearningChapter": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "slug": { "type": "string" },
+          "description": { "type": "string" },
+          "content": { "type": "string" },
+          "level": {
+            "type": "string",
+            "enum": ["BEGINNER", "INTERMEDIATE", "ADVANCED", "PROFESSIONAL"]
+          },
+          "category": {
+            "type": "string",
+            "enum": ["BASICS", "INVESTMENT", "DISTRIBUTOR", "RESEARCH"]
+          },
+          "order": { "type": "integer" },
+          "estimatedTime": { "type": "integer" },
+          "isActive": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserLearningProgress": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "chapterId": { "type": "string" },
+          "completed": { "type": "boolean" },
+          "progress": { "type": "number" },
+          "timeSpent": { "type": "integer" },
+          "lastAccessed": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserBookmark": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "chapterId": { "type": "string" },
+          "sectionId": { "type": "string" },
+          "note": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ChapterQuiz": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "chapterId": { "type": "string" },
+          "question": { "type": "string" },
+          "options": { "type": "string" },
+          "correctAnswer": { "type": "integer" },
+          "explanation": { "type": "string" },
+          "order": { "type": "integer" },
+          "isActive": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UserBadge": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "badgeType": { "type": "string" },
+          "badgeName": { "type": "string" },
+          "badgeDescription": { "type": "string" },
+          "earnedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "InvestorGuide": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "userId": { "type": "string" },
+          "title": { "type": "string" },
+          "content": { "type": "string" },
+          "goals": { "type": "string" },
+          "riskProfile": { "type": "string" },
+          "timeHorizon": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

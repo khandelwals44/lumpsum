@@ -9,7 +9,7 @@ import { RegisterSW } from "@/components/RegisterSW";
 import { AuthButtons } from "@/components/AuthButtons";
 import { ClientSession } from "@/components/ClientSession";
 import { Button } from "@/components/ui/button";
-import { Home, Target, BarChart3, User, Calculator } from "lucide-react";
+import { Home, Target, BarChart3, User, Calculator, BookOpen } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-  { name: "Onboarding", href: "/onboarding", icon: User },
+  { name: "Learning Hub", href: "/learning", icon: BookOpen },
   { name: "Calculators", href: "/calculators", icon: Calculator },
   { name: "About", href: "/about", icon: Target }
 ];

@@ -15,13 +15,15 @@
     "prepare": "husky install",
     "postinstall": "prisma generate",
     "db:seed": "prisma db seed",
-    "db:seed:learning": "tsx prisma/seed-learning.ts"
+    "db:seed:learning": "tsx prisma/seed-learning.ts",
+    "db:migrate": "prisma migrate deploy"
   },
   "engines": {
     "node": ">=18.18.0"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
+    "@next-auth/prisma-adapter": "^1.0.7",
     "@prisma/client": "^5.22.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",

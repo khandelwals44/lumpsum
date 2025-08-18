@@ -168,6 +168,30 @@ npm run dev
 docker-compose up --build
 ```
 
+### Deployment
+
+#### Vercel Deployment
+
+1. **Environment Variables**: Set the following in your Vercel project settings:
+   - `DATABASE_URL`: Your production database URL (PostgreSQL recommended)
+   - `NEXTAUTH_URL`: Your production URL (e.g., `https://your-domain.vercel.app`)
+   - `NEXTAUTH_SECRET`: A secure random string for NextAuth
+   - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: If using Google OAuth
+   - `GITHUB_CLIENT_ID` & `GITHUB_CLIENT_SECRET`: If using GitHub OAuth
+
+2. **Database**: For production, use PostgreSQL instead of SQLite:
+
+   ```prisma
+   datasource db {
+     provider = "postgresql"
+     url      = env("DATABASE_URL")
+   }
+   ```
+
+3. **Build Process**: The build script automatically runs `prisma generate` to ensure the Prisma client is up-to-date.
+
+4. **Deploy**: Connect your GitHub repository to Vercel and deploy.
+
 ### Health
 
 - Frontend: `GET /api/health`

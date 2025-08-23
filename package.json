@@ -30,7 +30,8 @@
     "db:seed": "npm run db:seed --workspace=backend",
     "db:seed:learning": "npm run db:seed:learning --workspace=frontend",
     "test:integration": "npm run test:frontend && npm run test:backend",
-    "test:coverage": "npm run test:frontend -- --coverage && npm run test:backend -- --coverage"
+    "test:coverage": "npm run test:frontend -- --coverage && npm run test:backend -- --coverage",
+    "postinstall": "npm run postinstall --workspace=frontend"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

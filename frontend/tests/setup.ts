@@ -209,4 +209,4 @@ global.sessionStorage = sessionStorageMock;
 process.env.DATABASE_URL =
   "postgres://neondb_owner:npg_PL06dTzliwVn@ep-empty-forest-adg09a8q-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require";
 process.env.NEXTAUTH_URL = "http://localhost:3000";
-process.env.NEXTAUTH_SECRET = "test-secret";
+process.env.NEXTAUTH_SECRET = "test-secret-key-for-testing-only-123456789";

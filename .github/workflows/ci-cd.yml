@@ -1,70 +1,60 @@
-name: CI/CD Pipeline - Version 2.0
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, feature/vsCode]
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [main]
 
 env:
   NODE_VERSION: '18.18.0'
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_URL: "file:./test.db"
+  NEXTAUTH_URL: "http://localhost:3000"
+  NEXTAUTH_SECRET: "test-secret-key-for-testing-only-123456789"
 
 jobs:
-  # Frontend Testing & Building
   frontend:
-    name: Frontend - Test & Build
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Generate Prisma client
-      run: npm run db:generate --workspace=frontend
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        
-    - name: Run frontend type checking
-      run: npm run typecheck --workspace=frontend
-      
-    - name: Run frontend linting
-      run: npm run lint --workspace=frontend
-      
-    - name: Run frontend tests
-      run: npm run test:frontend
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        
-    - name: Build frontend
-      run: npm run build:frontend
-      env:
-        DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
-        NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-        
-    - name: Upload frontend build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/.next/
-        retention-days: 1
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # Backend Testing & Building
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        run: npm run db:generate --workspace=frontend
+
+      - name: Typecheck
+        run: npm run typecheck --workspace=frontend
+
+      - name: Lint
+        run: npm run lint --workspace=frontend
+
+      - name: Run frontend tests
+        run: npm run test --workspace=frontend
+
+      - name: Build frontend
+        run: npm run build --workspace=frontend
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
+
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.next
+
   backend:
-    name: Backend - Test & Build
     runs-on: ubuntu-latest
-    
     services:
       postgres:
         image: postgres:15
@@ -78,182 +68,152 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Generate Prisma client
-      run: npm run db:generate --workspace=backend
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        
-    - name: Run database migrations
-      run: npm run db:push --workspace=backend
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        
-    - name: Run backend type checking
-      run: npm run typecheck --workspace=backend
-      
-    - name: Run backend tests
-      run: npm run test:backend
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        JWT_SECRET: test-jwt-secret
-        
-    - name: Build backend
-      run: npm run build:backend
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        
-    - name: Upload backend build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: backend-build
-        path: backend/dist/
-        retention-days: 1
 
-  # Integration Testing
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        run: npm run db:generate --workspace=backend
+
+      - name: Run database migrations
+        run: npm run db:push --workspace=backend
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+
+      - name: Typecheck
+        run: npm run typecheck --workspace=backend
+
+      - name: Run backend tests
+        run: npm run test --workspace=backend
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db"
+
+      - name: Build backend
+        run: npm run build --workspace=backend
+
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist
+
   integration:
-    name: Integration Tests
     runs-on: ubuntu-latest
     needs: [frontend, backend]
-    
-    services:
-      postgres:
-        image: postgres:15
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Download frontend build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.next
+
+      - name: Download backend build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist
+
+      - name: Setup test database
+        run: |
+          npm run db:generate --workspace=frontend
+          npm run db:push --workspace=frontend
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Download frontend artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/.next/
-        
-    - name: Download backend artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: backend-build
-        path: backend/dist/
-        
-    - name: Setup test database
-      run: npm run db:push --workspace=backend
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        
-    - name: Seed test data
-      run: npm run db:seed:learning
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        
-    - name: Run integration tests
-      run: npm run test:integration
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-        JWT_SECRET: test-jwt-secret
+          DATABASE_URL: ${{ env.DATABASE_URL }}
 
-  # Security & Quality Checks
+      - name: Seed test data
+        run: npm run db:seed:learning --workspace=frontend
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
+
   security:
-    name: Security & Quality
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run security audit
-      run: npm audit --audit-level=moderate
-      
-    - name: Check for outdated dependencies
-      run: npm outdated || true
-      
-    - name: Run code quality checks
-      run: |
-        npm run lint --workspaces
-        npm run typecheck --workspaces
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # Deploy to Vercel (Production)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+
+      - name: Check for outdated packages
+        run: npm outdated
+
+      - name: Lint code
+        run: npm run lint --workspaces
+
+      - name: Typecheck
+        run: npm run typecheck --workspaces
+
   deploy-production:
-    name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [frontend, backend, integration, security]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+    if: github.ref == 'refs/heads/main'
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prod'
-        
-    - name: Run post-deployment tests
-      run: |
-        echo "Running post-deployment health checks..."
-        # Add health check URLs here
-        curl -f https://lumpsum.in/api/health || exit 1
-        curl -f https://lumpsum.in/api/docs || exit 1
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # Deploy to Preview (Staging)
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f ${{ secrets.VERCEL_URL }}/health || exit 1
+
   deploy-preview:
-    name: Deploy Preview
     runs-on: ubuntu-latest
     needs: [frontend, backend, integration, security]
     if: github.event_name == 'pull_request'
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Deploy to Vercel Preview
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--target=preview'
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel Preview
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--target=preview'

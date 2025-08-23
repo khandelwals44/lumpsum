@@ -1,9 +1,9 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:frontend",
   "installCommand": "npm install",
   "framework": "nextjs",
   "functions": {
-    "app/api/**/*.ts": {
+    "frontend/app/api/**/*.ts": {
       "maxDuration": 30
     }
   },
@@ -14,5 +14,7 @@
     "env": {
       "NODE_ENV": "production"
     }
-  }
+  },
+  "regions": ["iad1"],
+  "public": true
 }

@@ -5,8 +5,7 @@
   "description": "Frontend Next.js application for lumpsum.in - High-end Goal-based Mutual Fund Recommendation Platform",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
-    "postbuild": "prisma generate",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc -p tsconfig.json --noEmit",

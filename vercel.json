@@ -1,5 +1,5 @@
 {
-  "buildCommand": "./vercel-build.sh",
+  "buildCommand": "cd frontend && npm install --include=dev && npm run build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": "frontend/.next",

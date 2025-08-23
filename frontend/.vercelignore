@@ -1,0 +1,12 @@
+tests/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+vitest.config.ts
+jest.config.js
+coverage/
+.nyc_output/
+.env.local
+.env.development
+.env.test

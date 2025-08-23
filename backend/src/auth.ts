@@ -19,11 +19,12 @@ export type JwtPayload = { sub: string; role: string };
 
 /**
  * Sign a short-lived access token for API requests.
- * @param payload user id and role
+ * @param userId user id string
+ * @param role user role (default: USER)
  * @returns JWT string
  */
-export function signAccessToken(payload: JwtPayload): string {
-  return jwt.sign(payload, Env.JWT_SECRET, { expiresIn: "15m" });
+export function signAccessToken(userId: string, role: string = "USER"): string {
+  return jwt.sign({ sub: userId, role }, Env.JWT_SECRET, { expiresIn: "15m" });
 }
 
 /**

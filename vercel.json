@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd frontend && npm install --include=dev && npm run build",
+  "buildCommand": "cd frontend && npm install --include=dev && npx prisma generate && npm run build",
   "installCommand": "npm install",
   "framework": "nextjs",
   "outputDirectory": "frontend/.next",

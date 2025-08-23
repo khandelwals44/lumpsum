@@ -10,14 +10,14 @@ describe("/me and /calc-history endpoints", () => {
 
   it("returns user on /me with auth", async () => {
     const app = createApp();
-    const token = signAccessToken({ sub: "u1", role: "USER" });
+    const token = signAccessToken("u1");
     const res = await request(app).get("/me").set("Authorization", `Bearer ${token}`).expect(200);
     expect(res.body).toHaveProperty("role");
   });
 
   it("saves and lists calc-history with auth", async () => {
     const app = createApp();
-    const token = signAccessToken({ sub: "u1", role: "USER" });
+    const token = signAccessToken("u1");
     await request(app)
       .post("/calc-history")
       .set("Authorization", `Bearer ${token}`)

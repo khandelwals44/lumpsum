@@ -1,217 +1,282 @@
-# lumpsum
+# 🚀 lumpsum.in - Mutual Fund Learning & Advisory Platform
 
-lumpsum.in
+A production-grade, SEO-friendly Next.js + TypeScript monorepo for the world's most comprehensive mutual fund learning and advisory platform.
 
-## lumpsum.in – Mutual Fund Calculators (Next.js + TypeScript)
-
-Modern, SEO-friendly calculator suite: EMI, SIP, Lumpsum, Goal Planner, FD, and NPS. 100% client-side. Accessible, fast, and ready for Vercel.
-
-### Tech
-
-- Next.js App Router, TypeScript
-- Tailwind CSS, shadcn-style components, lucide-react
-- Recharts (lazy loaded), next-themes
-- ESLint (a11y), Prettier, Vitest + RTL
-- CI on GitHub Actions
-
-### Getting Started
-
-```bash
-npm i
-npm run dev
-```
-
-App runs at `http://localhost:3000`.
-
-### Scripts
-
-- `dev`: start dev server
-- `build`: production build
-- `start`: start production server
-- `lint`: run ESLint
-- `typecheck`: run TypeScript checks
-- `test`: run vitest
-- `format`: run Prettier
-
-### Deployment
-
-Deploy on Vercel. The repo is Vercel-ready; import and deploy. Add a custom domain `lumpsum.in` in Vercel settings.
-
-### Structure
-
-See `app/` for pages and layouts. Calculator logic lives in `lib/calc/*` as pure functions returning totals and time-series for charts and CSV. UI and logic stay separated for readability and testing.
-
-Key folders:
-
-- `lib/calc/*`: pure TypeScript math (EMI, SIP, Lumpsum, Goal, FD, NPS, SWP, PPF, RD, IncomeTax)
-- `app/calculators/*`: UI pages using the calc functions, URL state sync, charts, content/FAQ
-- `components/*`: reusable UI (inputs, charts, share buttons)
-
-### Add a Calculator
-
-1. Create `lib/calc/yourcalc.ts` with a typed function returning totals and series (no UI, no formatting). Add concise comments at the top describing inputs/outputs.
-2. Create `app/calculators/yourcalc/page.tsx` for UI. Keep state local, sync to URL via `useUrlState`, and reuse `SliderWithInput`, `ResultStat`, and `ChartContainer`.
-3. Add a card in `app/page.tsx`.
-4. Add tests in `tests/*` when adding new formulas.
-
-### Learning Hub
-
-The Mutual Fund University provides comprehensive educational content:
-
-- **Chapters**: Structured learning content with sections, examples, and interactive elements
-- **Progress Tracking**: Automatic progress saving and time tracking
-- **Bookmarks**: Save important sections with personal notes
-- **Quizzes**: Interactive knowledge checks with explanations
-- **Badges**: Gamified achievements for completing milestones
-- **Categories**: Organized by level (Beginner, Intermediate, Advanced, Professional) and topic
-
-#### Add Learning Content
-
-1. **Seed Content**: Add chapters and quizzes to `prisma/seed-learning.ts`
-2. **Run Seed**: `npm run db:seed:learning`
-3. **API Routes**: Learning endpoints are in `app/api/learning/`
-4. **Components**: Main hub at `app/learning/`, individual chapters at `app/learning/chapter/[slug]/`
-
-### Features
-
-- **Calculators**: EMI, SIP, Lumpsum, Goal Planner, FD, NPS, SWP, PPF, RD, Income Tax (simplified)
-- **Combined Invest (SIP/Lumpsum) page**
-- **Mutual Fund University**: Complete learning hub with 100+ chapters covering beginner to professional levels
-- **Interactive Learning**: Progress tracking, bookmarks, quizzes, and gamified badges
-- **Investor & Distributor Guides**: Personalized investment plans and MFD training content
-- **CSV export example (EMI)**
-- **Share via Web Share API and social shortcuts (WhatsApp/Twitter/Email)**
-- **Dark/Light theme, glassmorphism accents, lazy charts**
-
-### Formatting & Locale
-
-Use helpers in `lib/format.ts` for en-IN currency and number formatting.
-
-### URL Sharing
-
-Inputs are synced to query params. Use the Share button to copy a full state URL.
-
-### CSV Export
-
-EMI amortization table includes an Export CSV button example. Use `toCsv` in `lib/format` for other series.
-
-### Analytics
-
-Add your analytics snippet inside the root layout where indicated (e.g., GA4). No keys are committed.
-
-### Logging & Debugging
-
-Frontend
-
-- Start: `npm run dev` (http://localhost:3000)
-- Check DevTools Network/Console for API errors and warnings
-- Typecheck: `npm run typecheck`; Tests: `npm test`
-- If dev build is odd: stop server, delete `.next`, restart
-
-Backend
-
-- Start: `npm --prefix backend run dev` (http://localhost:4000)
-- Env: `backend/.env` with `DATABASE_URL`, `JWT_SECRET`, `PORT`
-- Health: `GET /health`; Swagger: `/docs`
-- Logs: Pino JSON output; look for `"level"` and message
-- Tests: `npm --prefix backend test`
-
-Auth tips
-
-- 401 on protected routes: set `Authorization: Bearer <access>` header
-- Refresh flow: call `/auth/refresh` with `{ refresh }` when 401 occurs, then retry with new access
-- SQLite locked: close other apps using the file; re-run
-
-### Accessibility
-
-Keyboard-friendly controls, focus rings, sufficient contrast, and semantic markup.
-
-### Testing
-
-Run `npm test`. Add unit tests alongside `tests/*`. Component tests can mount pages using RTL.
-
-### CI
-
-GitHub Actions runs install, typecheck, lint, tests, and build on PRs.
-
-### PWA
-
-Basic web manifest is present. Add a service worker if you want offline cache of calculator pages.
-
-## Production Setup (Backend + Frontend)
-
-- Frontend: Next.js app in this repo (see scripts). Env validated via `lib/env.ts`.
-- Backend: Express service under `backend/` with Swagger UI at `/docs`. Env validated via `backend/src/env.ts`.
-
-### Run locally
-
-- Frontend
+## 📁 Project Structure
 
 ```
-npm i
-npm run dev
+lumpsum-1/
+├── frontend/                 # Next.js Frontend Application
+│   ├── app/                 # Next.js App Router pages
+│   ├── components/          # React components
+│   ├── lib/                 # Utility functions and configurations
+│   ├── public/              # Static assets
+│   ├── styles/              # Global styles
+│   ├── tests/               # Frontend tests
+│   └── docs/                # Swagger documentation (copied from backend)
+├── backend/                 # Express.js Backend API
+│   ├── src/                 # Backend source code
+│   ├── prisma/              # Database schema and migrations
+│   ├── docs/                # API documentation
+│   └── tests/               # Backend tests
+├── package.json             # Root monorepo configuration
+├── docker-compose.yml       # Multi-service Docker setup
+├── Dockerfile               # Frontend Docker configuration
+├── Dockerfile.backend       # Backend Docker configuration
+└── vercel.json              # Vercel deployment configuration
 ```
 
-- Backend
+## 🛠️ Technology Stack
 
-```
-cd backend
-npm i
-npm run dev
-```
+### Frontend (Next.js)
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Animations**: Framer Motion
+- **Charts**: Recharts
+- **Authentication**: NextAuth.js
+- **Testing**: Vitest + React Testing Library
 
-### Docker
+### Backend (Express.js)
+- **Framework**: Express.js
+- **Language**: TypeScript
+- **Database**: Prisma ORM + PostgreSQL
+- **Authentication**: JWT
+- **Documentation**: Swagger/OpenAPI
+- **Testing**: Jest + Supertest
 
-- Build and run
+### Infrastructure
+- **Database**: PostgreSQL (production), SQLite (development)
+- **Deployment**: Vercel (frontend), Railway/Render (backend)
+- **Containerization**: Docker + Docker Compose
+- **CI/CD**: GitHub Actions
 
-```
-docker-compose up --build
-```
+## 🚀 Quick Start
 
-### Deployment
+### Prerequisites
+- Node.js 18.18.0+
+- npm or yarn
+- PostgreSQL (for production)
 
-#### Vercel Deployment
+### Development Setup
 
-1. **Environment Variables**: Set the following in your Vercel project settings:
-   - `DATABASE_URL`: Your production database URL (PostgreSQL recommended)
-   - `NEXTAUTH_URL`: Your production URL (e.g., `https://your-domain.vercel.app`)
-   - `NEXTAUTH_SECRET`: A secure random string for NextAuth
-   - `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: If using Google OAuth
-   - `GITHUB_CLIENT_ID` & `GITHUB_CLIENT_SECRET`: If using GitHub OAuth
-
-2. **Database**: For production, use PostgreSQL instead of SQLite:
-
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
+1. **Clone and Install Dependencies**
+   ```bash
+   git clone <repository-url>
+   cd lumpsum-1
+   npm install
    ```
 
-3. **Build Process**: The build script automatically runs `prisma generate` to ensure the Prisma client is up-to-date.
+2. **Environment Setup**
+   ```bash
+   # Create environment files
+   cp .env.example .env
+   cp frontend/.env.example frontend/.env
+   cp backend/.env.example backend/.env
+   ```
 
-4. **Deploy**: Connect your GitHub repository to Vercel and deploy.
+3. **Database Setup**
+   ```bash
+   # For development (SQLite)
+   npm run db:push
+   npm run db:seed:learning
+   
+   # For production (PostgreSQL)
+   npm run db:migrate
+   npm run db:seed:learning
+   ```
 
-### Health
+4. **Start Development Servers**
+   ```bash
+   # Start both frontend and backend
+   npm run dev
+   
+   # Or start individually
+   npm run dev:frontend  # Frontend on http://localhost:3000
+   npm run dev:backend   # Backend on http://localhost:4000
+   ```
 
-- Frontend: `GET /api/health`
-- Backend: `GET /health`
+## 📚 Features
 
-### Swagger / API Docs
+### 🎓 Mutual Fund University (Learning Hub)
+- **Comprehensive Curriculum**: 50+ chapters from basics to advanced
+- **Interactive Learning**: Quizzes, progress tracking, bookmarks
+- **Personalized Experience**: Save progress, take notes, earn badges
+- **Export Capabilities**: Generate PDF guides and notes
 
-- Backend Swagger UI: `http://localhost:4000/docs`
-- Raw OpenAPI: `docs/swagger.json`
+### 🧮 Advanced Calculators
+- **Investment Calculators**: SIP, Lumpsum, Goal Planner, XIRR
+- **Tax Calculators**: Income Tax, GST, Capital Gains
+- **Retirement Planning**: NPS, PPF, FD, RD
+- **Advanced Features**: Save results, share links, export PDF/CSV
 
-### CI/CD
+### 📊 Portfolio Management
+- **Portfolio Tracking**: Manual entry and CSV import
+- **Asset Allocation**: Visual breakdown and recommendations
+- **Performance Analysis**: XIRR calculations and historical data
+- **Goal-based Planning**: Link investments to financial goals
 
-- GitHub Actions runs typecheck, tests, Prisma generate/db push/seed, and build.
+### 🔍 Mutual Fund Explorer
+- **Live NAV Data**: Real-time mutual fund information
+- **Advanced Filters**: Category, rating, performance, risk
+- **Comparison Tools**: Side-by-side fund analysis
+- **Research Reports**: Detailed fund analysis and insights
 
-### Tests
+### 👤 User Management
+- **Authentication**: Google, GitHub, Email, Credentials
+- **User Profiles**: Personal information and preferences
+- **Investment Goals**: Goal setting and tracking
+- **Calculation History**: Save and revisit past calculations
 
-- Frontend: `npm test`
-- Backend: `cd backend && npm test`
+## 🏗️ Development Commands
 
-### Env
+### Root Level (Monorepo)
+```bash
+npm run dev              # Start both frontend and backend
+npm run build            # Build both applications
+npm run test             # Run all tests
+npm run lint             # Lint all code
+npm run typecheck        # Type check all code
+```
 
-- Frontend: `.env.local` with `DATABASE_URL`, `NEXTAUTH_*`, optional `NEXT_PUBLIC_API_BASE_URL` to call backend.
-- Backend: `.env` with `DATABASE_URL`, `JWT_SECRET`, `PORT`.
+### Frontend Only
+```bash
+npm run dev:frontend     # Start frontend development server
+npm run build:frontend   # Build frontend for production
+npm run test:frontend    # Run frontend tests
+npm run lint:frontend    # Lint frontend code
+```
+
+### Backend Only
+```bash
+npm run dev:backend      # Start backend development server
+npm run build:backend    # Build backend for production
+npm run test:backend     # Run backend tests
+npm run db:push          # Push database schema changes
+npm run db:migrate       # Run database migrations
+npm run db:seed          # Seed database with initial data
+```
+
+## 🐳 Docker Deployment
+
+### Local Development with Docker
+```bash
+# Start all services
+docker-compose up
+
+# Start specific services
+docker-compose up frontend backend
+docker-compose up postgres
+```
+
+### Production Deployment
+```bash
+# Build and run production containers
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+## 🌐 Deployment
+
+### Frontend (Vercel)
+1. Connect repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Backend (Railway/Render)
+1. Connect repository to Railway/Render
+2. Set environment variables
+3. Configure build command: `npm run build:backend`
+4. Configure start command: `npm run start:backend`
+
+### Environment Variables
+
+#### Frontend (.env)
+```env
+DATABASE_URL=postgresql://user:pass@host:port/db
+NEXTAUTH_URL=https://your-domain.vercel.app
+NEXTAUTH_SECRET=your-secure-random-string
+NEXT_PUBLIC_API_URL=https://your-backend-url.com
+```
+
+#### Backend (.env)
+```env
+DATABASE_URL=postgresql://user:pass@host:port/db
+JWT_SECRET=your-secure-jwt-secret
+CORS_ORIGIN=https://your-frontend-domain.vercel.app
+PORT=4000
+```
+
+## 🧪 Testing
+
+### Frontend Tests
+```bash
+npm run test:frontend        # Run all frontend tests
+npm run test:frontend:watch  # Run tests in watch mode
+```
+
+### Backend Tests
+```bash
+npm run test:backend         # Run all backend tests
+npm run test:backend:watch   # Run tests in watch mode
+```
+
+### Test Coverage
+- Frontend: Vitest with React Testing Library
+- Backend: Jest with Supertest
+- Target: 80%+ coverage for both
+
+## 📖 API Documentation
+
+### Swagger UI
+- **Development**: http://localhost:4000/api/docs
+- **Production**: https://your-backend-url.com/api/docs
+
+### API Endpoints
+- **Authentication**: `/api/auth/*`
+- **User Management**: `/api/profile`, `/api/goals`
+- **Calculators**: `/api/calc-history`
+- **Learning Hub**: `/api/learning/*`
+- **Mutual Funds**: `/api/funds`
+- **Portfolio**: `/api/holdings`
+
+## 🔧 Configuration
+
+### Database
+- **Development**: SQLite (file-based)
+- **Production**: PostgreSQL (cloud-hosted)
+- **Migrations**: Prisma migrations
+- **Seeding**: Initial data and learning content
+
+### Authentication
+- **Providers**: Google, GitHub, Email, Credentials
+- **Session**: JWT-based with refresh tokens
+- **Security**: bcrypt password hashing, rate limiting
+
+### Performance
+- **Frontend**: Next.js optimization, code splitting
+- **Backend**: Express middleware, connection pooling
+- **Database**: Prisma query optimization, indexing
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For support and questions:
+- Create an issue in the GitHub repository
+- Check the [documentation](docs/)
+- Review the [API documentation](backend/docs/)
+
+---
+
+**Built with ❤️ for the Indian mutual fund community**

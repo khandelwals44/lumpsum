@@ -147,18 +147,6 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Download frontend artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: frontend-build
-        path: frontend/.next
-
-    - name: Download backend artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: backend-build
-        path: backend/dist
-
     - name: Run integration tests
       run: npm run test:integration
       env:

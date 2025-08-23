@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepare": "husky install",
+    "prepare": "echo 'Skipping husky install in production'",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:seed": "prisma db seed",

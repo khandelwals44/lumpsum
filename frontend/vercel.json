@@ -1,9 +1,7 @@
 {
-  "buildCommand": "npm run build:frontend",
-  "installCommand": "npm install",
   "framework": "nextjs",
   "functions": {
-    "frontend/app/api/**/*.ts": {
+    "app/api/**/*.ts": {
       "maxDuration": 30
     }
   },
@@ -16,6 +14,5 @@
     }
   },
   "regions": ["iad1"],
-  "public": true,
-  "outputDirectory": "frontend/.next"
+  "public": true
 }

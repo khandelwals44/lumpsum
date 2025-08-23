@@ -32,6 +32,13 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Generate Prisma client
+      run: npm run db:generate
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+        NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
+
     - name: Run typecheck
       run: npm run typecheck
       env:
@@ -81,6 +88,13 @@ jobs:
 
     - name: Install dependencies
       run: npm install
+
+    - name: Generate Prisma client
+      run: npm run db:generate
+      env:
+        DATABASE_URL: ${{ env.DATABASE_URL }}
+        NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+        NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
 
     - name: Run typecheck
       run: npm run typecheck

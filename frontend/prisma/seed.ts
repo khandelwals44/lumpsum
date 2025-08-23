@@ -27,47 +27,97 @@ async function main() {
     create: { email: "user@lumpsum.in", name: "Normal User", password: userPass, role: "USER" }
   });
 
-  // Mutual Funds (simplified for current schema)
+  // Mutual Funds (complete data matching schema)
   const fundsData = [
     {
       name: "ICICI Prudential Bluechip Fund",
       category: "Equity",
       subCategory: "Large Cap",
+      assetClass: "equity",
+      riskLevel: "moderate",
+      expenseRatio: 1.75,
       nav: 67.89,
-      navDate: new Date(),
-      isActive: true
+      fundSize: 25000,
+      minInvestment: 100,
+      benchmark: "NIFTY 100 TRI",
+      fundManager: "Team ICICI",
+      inceptionDate: new Date("2015-05-01"),
+      isActive: true,
+      oneYearReturn: 15.2,
+      threeYearReturn: 18.9,
+      fiveYearReturn: 16.5
     },
     {
       name: "HDFC Mid-Cap Opportunities Fund",
       category: "Equity",
       subCategory: "Mid Cap",
+      assetClass: "equity",
+      riskLevel: "high",
+      expenseRatio: 1.85,
       nav: 45.67,
-      navDate: new Date(),
-      isActive: true
+      fundSize: 15000,
+      minInvestment: 100,
+      benchmark: "NIFTY Midcap 150 TRI",
+      fundManager: "Team HDFC",
+      inceptionDate: new Date("2014-04-01"),
+      isActive: true,
+      oneYearReturn: 18.5,
+      threeYearReturn: 22.3,
+      fiveYearReturn: 19.8
     },
     {
       name: "Axis Bluechip Fund",
       category: "Equity",
       subCategory: "Large Cap",
+      assetClass: "equity",
+      riskLevel: "moderate",
+      expenseRatio: 1.65,
       nav: 52.34,
-      navDate: new Date(),
-      isActive: true
+      fundSize: 18000,
+      minInvestment: 100,
+      benchmark: "S&P BSE 100 TRI",
+      fundManager: "Team Axis",
+      inceptionDate: new Date("2016-06-01"),
+      isActive: true,
+      oneYearReturn: 16.8,
+      threeYearReturn: 19.2,
+      fiveYearReturn: 17.1
     },
     {
       name: "SBI Magnum Gilt Fund",
       category: "Debt",
       subCategory: "Gilt",
+      assetClass: "debt",
+      riskLevel: "low",
+      expenseRatio: 0.6,
       nav: 32.1,
-      navDate: new Date(),
-      isActive: true
+      fundSize: 9000,
+      minInvestment: 100,
+      benchmark: "CRISIL Government Bond Index",
+      fundManager: "Team SBI",
+      inceptionDate: new Date("2012-01-01"),
+      isActive: true,
+      oneYearReturn: 7.1,
+      threeYearReturn: 6.9,
+      fiveYearReturn: 7.4
     },
     {
       name: "Mirae Asset Hybrid Equity Fund",
       category: "Hybrid",
       subCategory: "Aggressive Hybrid",
+      assetClass: "hybrid",
+      riskLevel: "moderate",
+      expenseRatio: 1.2,
       nav: 28.45,
-      navDate: new Date(),
-      isActive: true
+      fundSize: 6000,
+      minInvestment: 100,
+      benchmark: "CRISIL Hybrid 35+65 Aggressive Index",
+      fundManager: "Team Mirae",
+      inceptionDate: new Date("2017-08-01"),
+      isActive: true,
+      oneYearReturn: 12.4,
+      threeYearReturn: 13.7,
+      fiveYearReturn: 12.9
     }
   ];
 
@@ -81,13 +131,9 @@ async function main() {
       data: {
         userId: user.id,
         fundId: firstFund.id,
-        fundName: firstFund.name,
-        fundCategory: firstFund.category,
-        fundSubCategory: firstFund.subCategory,
         units: 120.5,
-        nav: firstFund.nav,
-        currentValue: 120.5 * firstFund.nav,
-        purchaseDate: new Date()
+        avgCost: 50,
+        sipAmount: 5000
       }
     });
   }

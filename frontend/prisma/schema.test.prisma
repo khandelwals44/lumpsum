@@ -1,8 +1,9 @@
-// Test-specific Prisma schema for SQLite
-// This is used only for testing
+// Test-specific Prisma schema for SQLite testing
+// This file is used only for tests to avoid PostgreSQL dependency
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -109,18 +110,14 @@ model InvestmentGoal {
 }
 
 model PortfolioHolding {
-  id              String   @id @default(cuid())
-  userId          String
-  fundId          String
-  fundName        String
-  fundCategory    String
-  fundSubCategory String
-  units           Float
-  nav             Float
-  currentValue    Float
-  purchaseDate    DateTime
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id        String  @id @default(cuid())
+  userId    String
+  fundId    String
+  units     Float   @default(0)
+  avgCost   Float   @default(0)
+  sipAmount Float   @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -139,12 +136,12 @@ model FundRecommendation {
 }
 
 model RefreshToken {
-  id        String    @id @default(cuid())
-  userId    String
-  token     String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
+  id         String   @id @default(cuid())
+  userId     String
+  token      String   @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -153,76 +150,88 @@ model CalculationHistory {
   id         String   @id @default(cuid())
   userId     String
   calcType   String
-  inputJson  String
-  outputJson String
+  inputJson  String   // JSON string of inputs
+  outputJson String   // JSON string of outputs
   createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model MutualFund {
-  id          String   @id @default(cuid())
-  name        String
-  category    String
-  subCategory String
-  nav         Float
-  navDate     DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  category      String
+  subCategory   String
+  assetClass    String
+  riskLevel     String
+  expenseRatio  Float
+  nav           Float
+  fundSize      Float
+  minInvestment Float
+  benchmark     String
+  fundManager   String
+  inceptionDate DateTime
+  isActive      Boolean  @default(true)
+  oneYearReturn Float?
+  threeYearReturn Float?
+  fiveYearReturn Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model LearningChapter {
-  id            String   @id @default(cuid())
-  title         String
-  slug          String   @unique
-  description   String
-  content       String   // JSON as string for SQLite
-  level         String   // BEGINNER, INTERMEDIATE, ADVANCED
-  category      String   // BASICS, INVESTMENT, ANALYSIS, etc.
-  order         Int
-  estimatedTime Int      // in minutes
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  progress     UserLearningProgress[]
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  content     String   // JSON content with sections, examples, charts
+  level       String   // BEGINNER, INTERMEDIATE, ADVANCED, PROFESSIONAL
+  category    String   // BASICS, INVESTMENT, DISTRIBUTOR, RESEARCH
+  order       Int
+  estimatedTime Int    // minutes
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userProgress UserLearningProgress[]
   bookmarks    UserBookmark[]
   quizzes      ChapterQuiz[]
 }
 
 model ChapterQuiz {
-  id           String   @id @default(cuid())
-  chapterId    String
-  question     String
-  options      String   // JSON as string for SQLite
-  correctAnswer String
-  explanation  String?
-  order        Int
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  chapter      LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  userAnswers  UserQuizAnswer[]
-
+  id        String   @id @default(cuid())
+  chapterId String
+  question  String
+  options   String   // JSON array of options
+  correctAnswer Int
+  explanation String?
+  order     Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  chapter LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  userAnswers UserQuizAnswer[]
+  
   @@unique([chapterId, order])
 }
 
 model UserLearningProgress {
-  id           String   @id @default(cuid())
-  userId       String
-  chapterId    String
-  progress     Int      @default(0) // 0-100
-  completed    Boolean  @default(false)
-  timeSpent    Int?     // in seconds
+  id        String   @id @default(cuid())
+  userId    String
+  chapterId String
+  completed Boolean  @default(false)
+  progress  Float    @default(0) // 0-100 percentage
+  timeSpent Int      @default(0) // seconds
   lastAccessed DateTime @default(now())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   chapter LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
+  
   @@unique([userId, chapterId])
 }
 
@@ -230,11 +239,12 @@ model UserBookmark {
   id        String   @id @default(cuid())
   userId    String
   chapterId String
-  sectionId String?
-  note      String?
+  sectionId String?  // specific section within chapter
+  note      String?  // user's note
   createdAt DateTime @default(now())
-
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   chapter LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 }
 
@@ -242,37 +252,40 @@ model UserQuizAnswer {
   id        String   @id @default(cuid())
   userId    String
   quizId    String
-  answer    String
+  answer    Int
   isCorrect Boolean
-  createdAt DateTime @default(now())
-
+  answeredAt DateTime @default(now())
+  
+  // Relations
   user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   quiz ChapterQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
+  
   @@unique([userId, quizId])
 }
 
 model UserBadge {
   id        String   @id @default(cuid())
   userId    String
-  name      String
-  description String
-  icon      String?
+  badgeType String   // CHAPTER_COMPLETE, QUIZ_MASTER, STREAK_7_DAYS, etc.
+  badgeName String
+  badgeDescription String
   earnedAt  DateTime @default(now())
-
+  
+  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model InvestorGuide {
-  id           String   @id @default(cuid())
-  userId       String
-  title        String
-  content      String
-  goals        String?  // JSON as string for SQLite
-  riskProfile  String?
-  timeHorizon  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   String   // JSON structured content
+  goals     String   // JSON array of user goals
+  riskProfile String
+  timeHorizon String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

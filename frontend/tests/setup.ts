@@ -33,6 +33,133 @@ vi.mock("next-auth/react", () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => children
 }));
 
+// Mock Prisma Client
+vi.mock("@prisma/client", () => ({
+  PrismaClient: vi.fn().mockImplementation(() => ({
+    user: {
+      findUnique: vi.fn(),
+      findMany: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      upsert: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    mutualFund: {
+      findMany: vi.fn().mockResolvedValue([
+        {
+          id: "1",
+          name: "Test Fund",
+          category: "Equity",
+          subCategory: "Large Cap",
+          assetClass: "equity",
+          riskLevel: "moderate",
+          expenseRatio: 1.5,
+          nav: 100,
+          fundSize: 1000,
+          minInvestment: 100,
+          benchmark: "NIFTY 50",
+          fundManager: "Test Manager",
+          inceptionDate: new Date(),
+          isActive: true,
+          oneYearReturn: 15,
+          threeYearReturn: 18,
+          fiveYearReturn: 20,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      ]),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      createMany: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    portfolioHolding: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    investmentGoal: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    calculationHistory: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    learningChapter: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    userLearningProgress: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    userBookmark: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    chapterQuiz: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    userQuizAnswer: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    userBadge: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    investorGuide: {
+      findMany: vi.fn(),
+      findFirst: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteMany: vi.fn()
+    },
+    $disconnect: vi.fn()
+  }))
+}));
+
 // Mock Framer Motion
 vi.mock("framer-motion", () => ({
   motion: {
@@ -206,7 +333,6 @@ const sessionStorageMock = {
 global.sessionStorage = sessionStorageMock;
 
 // Set test environment variables
-process.env.DATABASE_URL = "file:./dev.db";
-process.env.DATABASE_PROVIDER = "sqlite";
+process.env.DATABASE_URL = "file:./test.db";
 process.env.NEXTAUTH_URL = "http://localhost:3000";
 process.env.NEXTAUTH_SECRET = "test-secret-key-for-testing-only-123456789";

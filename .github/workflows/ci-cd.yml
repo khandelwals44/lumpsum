@@ -8,7 +8,8 @@ on:
 
 env:
   NODE_VERSION: '18.18.0'
-  DATABASE_URL: "file:./test.db"
+  DATABASE_URL: "file:./dev.db"
+  DATABASE_PROVIDER: "sqlite"
   NEXTAUTH_URL: "http://localhost:3000"
   NEXTAUTH_SECRET: "test-secret-key-for-testing-only-123456789"
 

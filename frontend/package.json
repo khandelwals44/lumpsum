@@ -16,6 +16,7 @@
     "prepare": "echo 'Skipping husky install in production'",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
+    "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:seed:learning": "tsx ../backend/prisma/seed-learning.ts",
     "db:migrate": "prisma migrate deploy"
@@ -86,8 +87,8 @@
     "vitest": "^3.2.4"
   },
   "prisma": {
-    "schema": "../backend/prisma/schema.prisma",
-    "seed": "tsx ../backend/prisma/seed.ts"
+    "schema": "./prisma/schema.prisma",
+    "seed": "tsx ./prisma/seed.ts"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

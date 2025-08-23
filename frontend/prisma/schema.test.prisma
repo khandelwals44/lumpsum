@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Test-specific Prisma schema for SQLite
+// This is used only for testing
 
 generator client {
   provider = "prisma-client-js"

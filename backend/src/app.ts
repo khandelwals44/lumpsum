@@ -41,7 +41,7 @@ export function createApp(): express.Express {
       if (!user || !user.password) return res.status(401).json({ message: "Invalid credentials" });
       const ok = await bcrypt.compare(password, user.password);
       if (!ok) return res.status(401).json({ message: "Invalid credentials" });
-      const access = signAccessToken({ sub: user.id, role: user.role });
+      const access = signAccessToken(user.id, user.role);
       const refresh = await signRefreshToken(user.id);
       res.json({ access, refresh, role: user.role });
     } catch (err) {
@@ -58,7 +58,7 @@ export function createApp(): express.Express {
       const payload: any = (await import("jsonwebtoken")).default.decode(newRefresh);
       const userId = payload?.sub as string;
       const user = await prisma.user.findUnique({ where: { id: userId } });
-      const access = signAccessToken({ sub: userId, role: user?.role || "USER" });
+      const access = signAccessToken(userId, user?.role || "USER");
       res.json({ access, refresh: newRefresh, role: user?.role || "USER" });
     } catch (err) {
       next(err);

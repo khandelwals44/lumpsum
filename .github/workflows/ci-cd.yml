@@ -38,8 +38,19 @@ jobs:
       - name: Lint
         run: npm run lint --workspace=frontend
 
+      - name: Setup test database
+        run: npm run db:push --workspace=frontend
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
+
       - name: Run frontend tests
         run: npm run test --workspace=frontend
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          NEXTAUTH_URL: ${{ env.NEXTAUTH_URL }}
+          NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
 
       - name: Build frontend
         run: npm run build --workspace=frontend

@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  DATABASE_URL: "postgres://neondb_owner:npg_PL06dTzliwVn@ep-empty-forest-adg09a8q-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require"
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
   NEXTAUTH_URL: "https://lumpsum.vercel.app"
   NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 

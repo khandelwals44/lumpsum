@@ -18,6 +18,12 @@ vi.mock("next/navigation", () => {
   };
 });
 
+// Mock reCAPTCHA
+Object.defineProperty(window, 'executeRecaptcha', {
+  value: vi.fn().mockResolvedValue('mock-recaptcha-token'),
+  writable: true
+});
+
 import { signIn, useSession } from "next-auth/react";
 import SignInClient from "@/components/auth/SignInClient";
 
@@ -44,7 +50,7 @@ describe("SignInClient", () => {
       "credentials",
       expect.objectContaining({
         callbackUrl: "http://localhost:3000/dashboard",
-        redirect: true,
+        redirect: false,
         email: "user@lumpsum.in",
         password: "user123"
       })

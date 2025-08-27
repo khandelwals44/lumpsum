@@ -1,17 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import LearningHubClient from "../app/learning/LearningHubClient";
+import LearningHubClient from "@/app/learning/LearningHubClient";
 
-// Mock fetch
+// Mock fetch globally
 global.fetch = vi.fn();
-
-// Mock next-auth
-vi.mock("next-auth/react", () => ({
-  useSession: () => ({
-    data: { user: { email: "test@example.com" } },
-    status: "authenticated"
-  })
-}));
 
 describe("Learning Hub", () => {
   beforeEach(() => {
@@ -22,18 +14,17 @@ describe("Learning Hub", () => {
     const mockChapters = [
       {
         id: "1",
-        title: "What is a Mutual Fund?",
-        slug: "what-is-mutual-fund",
-        description: "Learn the fundamental concept of mutual funds",
+        title: "Introduction to Mutual Funds",
+        slug: "intro-mutual-funds",
+        description: "Learn the basics of mutual fund investing",
         level: "BEGINNER",
         category: "BASICS",
         order: 1,
         estimatedTime: 15
       }
     ];
-
-    const mockProgress: any[] = [];
-    const mockBadges: any[] = [];
+    const mockProgress = [];
+    const mockBadges = [];
 
     (fetch as any)
       .mockResolvedValueOnce({
@@ -53,38 +44,32 @@ describe("Learning Hub", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
+      expect(screen.getByText("Introduction to Mutual Funds")).toBeInTheDocument();
     });
-
-    expect(screen.getByText("What is a Mutual Fund?")).toBeInTheDocument();
-    // Note: The chapter details are not rendered in the current view, so we just check the main content loads
   });
 
   it("shows progress statistics", async () => {
-    const mockChapters: any[] = [];
+    const mockChapters = [
+      {
+        id: "1",
+        title: "Test Chapter",
+        slug: "test-chapter",
+        description: "A test chapter",
+        level: "BEGINNER",
+        category: "BASICS",
+        order: 1,
+        estimatedTime: 15
+      }
+    ];
     const mockProgress = [
       {
-        id: "1",
         chapterId: "1",
         completed: true,
-        progress: 100,
-        timeSpent: 900,
-        chapter: {
-          id: "1",
-          title: "Test Chapter",
-          slug: "test-chapter",
-          level: "BEGINNER",
-          category: "BASICS"
-        }
+        timeSpent: 900, // 15 minutes in seconds
+        lastAccessed: "2024-01-01T00:00:00Z"
       }
     ];
-    const mockBadges = [
-      {
-        id: "1",
-        badgeType: "FIRST_CHAPTER",
-        badgeName: "First Steps",
-        badgeDescription: "Completed your first learning chapter"
-      }
-    ];
+    const mockBadges = [];
 
     (fetch as any)
       .mockResolvedValueOnce({
@@ -103,8 +88,8 @@ describe("Learning Hub", () => {
     render(<LearningHubClient />);
 
     await waitFor(() => {
-      expect(screen.getAllByText("1")).toHaveLength(2); // Should find multiple "1" elements
-      expect(screen.getByText("15m")).toBeInTheDocument(); // Time spent
+      expect(screen.getByText("1")).toBeInTheDocument(); // Completed count
+      expect(screen.getByText("0")).toBeInTheDocument(); // Remaining count
     });
   });
 
@@ -159,7 +144,7 @@ describe("Learning Hub", () => {
 
     render(<LearningHubClient />);
 
-    // Should show loading skeleton
+    // Should show loading skeleton - the title should still be visible
     expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
   });
 

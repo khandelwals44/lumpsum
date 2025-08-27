@@ -25,16 +25,16 @@ This guide covers the complete deployment process for lumpsum.in version 2.0, in
 
 ### Vercel (Frontend)
 ```bash
-DATABASE_URL=postgres://neondb_owner:npg_PL06dTzliwVn@ep-empty-forest-adg09a8q-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
-NEXTAUTH_URL=https://lumpsum.in
-NEXTAUTH_SECRET=1vZAjvovHVv5Eou1azeoSahrP2jhCwgNG167T/GUv3k=
+DATABASE_URL=postgres://username:password@your-neon-host/your-database?sslmode=require
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your-super-secret-nextauth-key-change-this-in-production
 ```
 
 ### GitHub Secrets (CI/CD)
 ```bash
-DATABASE_URL=postgres://neondb_owner:npg_PL06dTzliwVn@ep-empty-forest-adg09a8q-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
-NEXTAUTH_URL=https://lumpsum.in
-NEXTAUTH_SECRET=1vZAjvovHVv5Eou1azeoSahrP2jhCwgNG167T/GUv3k=
+DATABASE_URL=postgres://username:password@your-neon-host/your-database?sslmode=require
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your-super-secret-nextauth-key-change-this-in-production
 VERCEL_TOKEN=your-vercel-token
 VERCEL_ORG_ID=your-vercel-org-id
 VERCEL_PROJECT_ID=your-vercel-project-id

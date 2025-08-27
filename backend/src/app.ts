@@ -239,7 +239,7 @@ export function createApp(): express.Express {
       if (!quiz) return res.status(404).json({ message: "Quiz not found" });
 
       const isCorrect = answer === quiz.correctAnswer;
-      const userAnswer = await prisma.userQuizAnswer.upsert({
+      await prisma.userQuizAnswer.upsert({
         where: { userId_quizId: { userId, quizId } },
         update: { answer, isCorrect },
         create: { userId, quizId, answer, isCorrect }

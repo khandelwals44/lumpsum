@@ -6,7 +6,7 @@ Set these environment variables in your Vercel project dashboard:
 
 ### Database
 ```
-DATABASE_URL=postgres://neondb_owner:npg_PL06dTzliwVn@ep-empty-forest-adg09a8q-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
+DATABASE_URL=postgres://username:password@your-neon-host/your-database?sslmode=require
 ```
 
 ### NextAuth Configuration

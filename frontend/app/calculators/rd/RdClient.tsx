@@ -12,9 +12,10 @@ import { parseParamNumber, useUrlState } from "@/lib/url";
 import { formatINR } from "@/lib/format";
 import { FadeIn } from "@/components/FadeIn";
 import { saveLocal, loadLocal } from "@/lib/persist";
-import { Api, getAuthToken } from "@/lib/api";
+import { Api } from "@/lib/api";
 import { Calculation, SavedCalculation } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
+import { getApiConfig } from '@/lib/env.client';
 export default function RdClient() {
   const sp = useSearchParams();
   const [monthly, setMonthly] = useState(parseParamNumber(sp, "m", 5000));
@@ -78,7 +79,7 @@ export default function RdClient() {
               };
               const savedCalculations = loadLocal<SavedCalculation[]>(STORAGE_KEY, []);
               saveLocal(STORAGE_KEY, [...savedCalculations, { ...newCalculation, id: uuidv4() }]);
-              if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+              if (getApiConfig().baseUrl) {
                 Api.saveCalculation(
                   newCalculation.type,
                   newCalculation.inputs,

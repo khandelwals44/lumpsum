@@ -14,7 +14,8 @@ import { formatINR } from "@/lib/format";
 import { FadeIn } from "@/components/FadeIn";
 import Link from "next/link";
 import { saveLocal, loadLocal } from "@/lib/persist";
-import { Api, getAuthToken } from "@/lib/api";
+import { Api } from "@/lib/api";
+import { getApiConfig } from "@/lib/env.client";
 import { Calculation, SavedCalculation, Mode } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 export default function InvestClient() {
@@ -146,8 +147,8 @@ export default function InvestClient() {
                 }
                 const savedCalculations = loadLocal<SavedCalculation[]>(STORAGE_KEY, []);
                 saveLocal(STORAGE_KEY, [...savedCalculations, { ...newCalculation, id: uuidv4() }]);
-                // If a backend token exists, also persist to backend history
-                if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+                // If backend is available, also persist to backend history
+                if (getApiConfig().baseUrl) {
                   const inputs = newCalculation.inputs;
                   const outputs = newCalculation.results as any;
                   Api.saveCalculation(newCalculation.type, inputs, outputs).catch(() => {});

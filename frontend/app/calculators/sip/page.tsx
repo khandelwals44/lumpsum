@@ -21,7 +21,8 @@ import { FadeIn } from "@/components/FadeIn";
 import { saveLocal, loadLocal } from "@/lib/persist";
 import { Calculation, SavedCalculation } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
-import { Api, getAuthToken } from "@/lib/api";
+import { Api } from "@/lib/api";
+import { getApiConfig } from '@/lib/env.client';
 
 export default function SipPage() {
   return (
@@ -122,7 +123,7 @@ function SipClient() {
                 ...savedCalculations,
                 { ...newCalculation, id: uuidv4() }
               ]);
-              if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+              if (getApiConfig().baseUrl) {
                 Api.saveCalculation(
                   newCalculation.type,
                   newCalculation.inputs,

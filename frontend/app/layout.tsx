@@ -10,6 +10,9 @@ import { AuthButtons } from "@/components/AuthButtons";
 import { ClientSession } from "@/components/ClientSession";
 import { Button } from "@/components/ui/button";
 import { Home, Target, BarChart3, User, Calculator, BookOpen } from "lucide-react";
+import { logEnvSummary, logConfig } from "@/lib/logSafe";
+import { DebugWrapper } from "@/components/DebugWrapper";
+import { getSiteUrl, SITE_CONFIG } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,29 +24,27 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.lumpsum.in"),
+  metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "lumpsum.in – High-end Goal-based Mutual Fund Recommendation Platform",
-    template: "%s · lumpsum.in"
+    default: "Lumpsum.in – Smart Financial Planning & Investment Calculators",
+    template: "%s | Lumpsum.in"
   },
-  description:
-    "Transform your financial future with AI-powered mutual fund recommendations. Personalized investment plans, goal tracking, and expert insights. Start your wealth journey today.",
+  description: SITE_CONFIG.description,
   openGraph: {
-    title: "lumpsum.in – Smart Mutual Fund Recommendations",
-    description:
-      "Transform your financial future with AI-powered mutual fund recommendations. Personalized investment plans, goal tracking, and expert insights.",
+    title: "Lumpsum.in – Smart Financial Planning & Investment Calculators",
+    description: SITE_CONFIG.description,
     url: "/",
-    siteName: "lumpsum.in",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
+    siteName: SITE_CONFIG.name,
+    images: [{ url: SITE_CONFIG.ogImage, width: 1200, height: 630 }],
     locale: "en_IN",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "lumpsum.in – Smart Mutual Fund Recommendations",
-    description:
-      "Transform your financial future with AI-powered mutual fund recommendations. Personalized investment plans, goal tracking, and expert insights.",
-    images: ["/og.png"]
+    title: "Lumpsum.in – Smart Financial Planning & Investment Calculators",
+    description: SITE_CONFIG.description,
+    images: [SITE_CONFIG.ogImage],
+    creator: SITE_CONFIG.twitterHandle
   },
   robots: {
     index: true,
@@ -63,6 +64,12 @@ const navigation = [
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Log environment and config in development
+  if (typeof window !== 'undefined') {
+    logEnvSummary();
+    logConfig();
+  }
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
@@ -71,13 +78,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
+              "@type": "Organization",
+              name: SITE_CONFIG.name,
+              url: SITE_CONFIG.url,
+              description: SITE_CONFIG.description,
+              logo: `${SITE_CONFIG.url}/logo.png`,
+              sameAs: [
+                `https://twitter.com/${SITE_CONFIG.twitterHandle.replace('@', '')}`,
+                "https://linkedin.com/company/lumpsum-in"
+              ]
+            })
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
               "@type": "WebSite",
-              name: "lumpsum.in",
-              url: "https://www.lumpsum.in/",
-              description: "High-end Goal-based Mutual Fund Recommendation Platform",
+              name: SITE_CONFIG.name,
+              url: SITE_CONFIG.url,
+              description: SITE_CONFIG.description,
               potentialAction: {
                 "@type": "SearchAction",
-                target: "https://www.lumpsum.in/?q={search_term_string}",
+                target: `${SITE_CONFIG.url}/?q={search_term_string}`,
                 "query-input": "required name=search_term_string"
               }
             })
@@ -85,7 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ClientSession>
-            <header className="sticky top-0 z-40 w-full border-b border-zinc-200/50 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 dark:border-zinc-800/50 dark:bg-zinc-950/80">
+            <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 dark:border-zinc-800/50 dark:bg-zinc-950/80">
               <div className="container flex h-16 items-center justify-between">
                 <Link href="/" className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -116,7 +140,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </header>
 
             {/* Mobile Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-zinc-200/50 dark:bg-zinc-950/80 dark:border-zinc-800/50">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-zinc-200/50 dark:bg-zinc-950/80 dark:border-zinc-800/50">
               <div className="flex justify-around py-2">
                 {navigation.map((item) => (
                   <Link
@@ -150,6 +174,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </footer>
             <AnalyticsSlot />
             <RegisterSW />
+            <DebugWrapper />
           </ClientSession>
         </ThemeProvider>
       </body>

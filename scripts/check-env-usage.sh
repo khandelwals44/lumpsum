@@ -10,6 +10,9 @@ echo "🔍 Checking for server environment variable usage in client code..."
 # Define directories to check (client-side code)
 CLIENT_DIRS=("frontend/src" "frontend/app" "frontend/components" "frontend/pages" "frontend/lib")
 
+# Define server-side file patterns to exclude
+SERVER_FILE_PATTERNS=("*.server.ts" "*.server.js" "api/**/*" "route.ts" "route.js")
+
 # Define server-side environment variable patterns (without NEXT_PUBLIC_)
 SERVER_ENV_PATTERNS=(
     "process\.env\.DATABASE_URL"
@@ -33,8 +36,8 @@ for dir in "${CLIENT_DIRS[@]}"; do
         echo "Checking directory: $dir"
         
         for pattern in "${SERVER_ENV_PATTERNS[@]}"; do
-            # Search for server env usage, excluding NEXT_PUBLIC_ patterns
-            violations=$(find "$dir" -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -exec grep -l "$pattern" {} \; 2>/dev/null || true)
+            # Search for server env usage, excluding server-side files and NEXT_PUBLIC_ patterns
+            violations=$(find "$dir" -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) \( -not -name "*.server.ts" -not -name "*.server.js" -not -path "*/api/*" -not -name "route.ts" -not -name "route.js" \) -exec grep -l "$pattern" {} \; 2>/dev/null || true)
             
             if [ -n "$violations" ]; then
                 echo "❌ Found server environment variable usage in client code:"
@@ -49,7 +52,7 @@ done
 echo "Checking for non-NEXT_PUBLIC_ process.env usage..."
 for dir in "${CLIENT_DIRS[@]}"; do
     if [ -d "$dir" ]; then
-        # Find all process.env usage that's not NEXT_PUBLIC_ or NODE_ENV
+        # Find all process.env usage that's not NEXT_PUBLIC_ or NODE_ENV, excluding server-side files
         while IFS= read -r -d '' file; do
             if [ -f "$file" ]; then
                 # Check for process.env usage that's not NEXT_PUBLIC_ or NODE_ENV
@@ -60,7 +63,7 @@ for dir in "${CLIENT_DIRS[@]}"; do
                     FOUND_VIOLATIONS=true
                 fi
             fi
-        done < <(find "$dir" -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -print0 2>/dev/null)
+        done < <(find "$dir" -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) \( -not -name "*.server.ts" -not -name "*.server.js" -not -path "*/api/*" -not -name "route.ts" -not -name "route.js" \) -print0 2>/dev/null)
     fi
 done
 

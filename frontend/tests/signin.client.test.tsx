@@ -18,6 +18,36 @@ vi.mock("next/navigation", () => {
   };
 });
 
+// Mock the ReCaptcha component
+vi.mock("../components/auth/ReCaptcha", () => ({
+  default: vi.fn(({ onVerify }) => {
+    // Call onVerify immediately to simulate reCAPTCHA verification
+    setTimeout(() => onVerify("mock-recaptcha-token"), 0);
+    return <div data-testid="mock-recaptcha" />;
+  })
+}));
+
+// Mock the validation schema
+vi.mock("../lib/validations/auth", () => ({
+  signInSchema: {
+    parse: vi.fn((data) => data)
+  }
+}));
+
+// Mock the logging functions
+vi.mock("../lib/logSafe", () => ({
+  logAuthFlow: vi.fn(),
+  logFormData: vi.fn(),
+  logError: vi.fn()
+}));
+
+// Mock the env client
+vi.mock("../lib/env.client", () => ({
+  getNextAuthConfig: vi.fn(() => ({
+    baseUrl: "http://localhost:3000"
+  }))
+}));
+
 // Mock reCAPTCHA properly
 Object.defineProperty(window, 'executeRecaptcha', {
   value: vi.fn().mockResolvedValue('mock-recaptcha-token'),

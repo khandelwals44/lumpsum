@@ -10,6 +10,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Level enum values as strings
+// BEGINNER, INTERMEDIATE, ADVANCED
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -98,137 +101,109 @@ model InvestmentGoal {
   priority                  String
   currentSavings            Float
   monthlyContribution       Float
-  projectedValue            Float
-  requiredMonthlyInvestment Float
-  deadline                  DateTime?
+  expectedReturn            Float
+  riskTolerance             String
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
-
-  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recommendations     FundRecommendation[]
-}
-
-model PortfolioHolding {
-  id        String  @id @default(cuid())
-  userId    String
-  fundId    String
-  units     Float   @default(0)
-  avgCost   Float   @default(0)
-  sipAmount Float   @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model FundRecommendation {
-  id          String   @id @default(cuid())
-  goalId      String
-  fundId      String
-  fundName    String
-  allocation  Float
-  riskLevel   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model PortfolioHolding {
+  id              String   @id @default(cuid())
+  userId          String
+  fundName        String
+  fundCode        String
+  units           Float
+  avgCost         Float
+  currentNAV      Float
+  currentValue    Float
+  totalReturn     Float
+  totalReturnPct  Float
+  sipAmount       Float?
+  sipDate         DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  goal InvestmentGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RefreshToken {
-  id         String   @id @default(cuid())
-  userId     String
-  token      String   @unique
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model CalculationHistory {
-  id         String   @id @default(cuid())
-  userId     String
-  calcType   String
-  inputJson  String   // JSON string of inputs
-  outputJson String   // JSON string of outputs
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  inputs    String   // JSON string
+  results   String   // JSON string
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model MutualFund {
+  id              String   @id @default(cuid())
+  name            String
+  code            String   @unique
+  category        String
+  subCategory     String
+  nav             Float
+  navDate         DateTime
+  expenseRatio    Float
+  fundSize        Float
+  fundAge         Int
+  fundManager     String
+  fundHouse       String
+  rating          Int?
+  riskLevel       String
+  minInvestment   Float
+  sipMinAmount    Float
+  exitLoad        Float
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// Learning Platform Models
+model LearningChapter {
   id            String   @id @default(cuid())
-  name          String
-  category      String
-  subCategory   String
-  assetClass    String
-  riskLevel     String
-  expenseRatio  Float
-  nav           Float
-  fundSize      Float
-  minInvestment Float
-  benchmark     String
-  fundManager   String
-  inceptionDate DateTime
+  title         String
+  slug          String   @unique
+  description   String?
+  content       String   @db.Text
+  level         String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  order         Int
+  estimatedTime Int      // in minutes
   isActive      Boolean  @default(true)
-  oneYearReturn Float?
-  threeYearReturn Float?
-  fiveYearReturn Float?
+  category      String
+  tags          String   // JSON array as string
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-}
 
-model LearningChapter {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  description String
-  content     String   // JSON content with sections, examples, charts
-  level       String   // BEGINNER, INTERMEDIATE, ADVANCED, PROFESSIONAL
-  category    String   // BASICS, INVESTMENT, DISTRIBUTOR, RESEARCH
-  order       Int
-  estimatedTime Int    // minutes
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
   // Relations
-  userProgress UserLearningProgress[]
-  bookmarks    UserBookmark[]
-  quizzes      ChapterQuiz[]
-}
-
-model ChapterQuiz {
-  id        String   @id @default(cuid())
-  chapterId String
-  question  String
-  options   String   // JSON array of options
-  correctAnswer Int
-  explanation String?
-  order     Int
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  
-  // Relations
-  chapter LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  userAnswers UserQuizAnswer[]
-  
-  @@unique([chapterId, order])
+  quizzes     ChapterQuiz[]
+  progress    UserLearningProgress[]
+  bookmarks   UserBookmark[]
 }
 
 model UserLearningProgress {
-  id        String   @id @default(cuid())
-  userId    String
-  chapterId String
-  completed Boolean  @default(false)
-  progress  Float    @default(0) // 0-100 percentage
-  timeSpent Int      @default(0) // seconds
+  id           String   @id @default(cuid())
+  userId       String
+  chapterId    String
+  completed    Boolean  @default(false)
+  timeSpent    Int      @default(0) // in minutes
   lastAccessed DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   
-  // Relations
-  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   chapter LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   
   @@unique([userId, chapterId])
@@ -238,53 +213,58 @@ model UserBookmark {
   id        String   @id @default(cuid())
   userId    String
   chapterId String
-  sectionId String?  // specific section within chapter
-  note      String?  // user's note
   createdAt DateTime @default(now())
   
-  // Relations
-  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   chapter LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, chapterId])
+}
+
+model ChapterQuiz {
+  id        String   @id @default(cuid())
+  chapterId String
+  question  String
+  options   String   // JSON array as string
+  correctAnswer Int
+  explanation String?
+  createdAt DateTime @default(now())
+  
+  chapter LearningChapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  answers  UserQuizAnswer[]
 }
 
 model UserQuizAnswer {
   id        String   @id @default(cuid())
   userId    String
   quizId    String
-  answer    Int
+  selectedAnswer Int
   isCorrect Boolean
   answeredAt DateTime @default(now())
   
-  // Relations
   user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   quiz ChapterQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, quizId])
 }
 
 model UserBadge {
   id        String   @id @default(cuid())
   userId    String
-  badgeType String   // CHAPTER_COMPLETE, QUIZ_MASTER, STREAK_7_DAYS, etc.
-  badgeName String
-  badgeDescription String
+  name      String
+  description String
+  icon      String
   earnedAt  DateTime @default(now())
   
-  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model InvestorGuide {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  content   String   // JSON structured content
-  goals     String   // JSON array of user goals
-  riskProfile String
-  timeHorizon String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  goals       String   // JSON array as string
+  recommendations String // JSON object as string
+  createdAt   DateTime @default(now())
   
-  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

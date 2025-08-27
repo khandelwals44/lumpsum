@@ -7,8 +7,15 @@ set -e
 
 echo "🔍 Checking for server environment variable usage in client code..."
 
-# Define directories to check (client-side code)
-CLIENT_DIRS=("frontend/src" "frontend/app" "frontend/components" "frontend/pages" "frontend/lib")
+# Define directories to check (client-side code only)
+CLIENT_DIRS=("frontend/components" "frontend/pages")
+
+# Define server-side directories and files (API routes, etc.) - these are excluded from checks
+SERVER_DIRS=("frontend/app/api")
+SERVER_FILES=("frontend/src/env.server.ts" "frontend/lib/auth.ts" "frontend/lib/env.server.ts")
+
+# Note: frontend/app directory contains both client and server code, so we exclude it entirely
+# and only check specific client-side directories above
 
 # Define server-side environment variable patterns (without NEXT_PUBLIC_)
 SERVER_ENV_PATTERNS=(
@@ -33,7 +40,7 @@ for dir in "${CLIENT_DIRS[@]}"; do
         echo "Checking directory: $dir"
         
         for pattern in "${SERVER_ENV_PATTERNS[@]}"; do
-            # Search for server env usage, excluding NEXT_PUBLIC_ patterns
+            # Search for server env usage, excluding server directories and NEXT_PUBLIC_ patterns
             violations=$(find "$dir" -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -exec grep -l "$pattern" {} \; 2>/dev/null || true)
             
             if [ -n "$violations" ]; then

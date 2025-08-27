@@ -3,6 +3,13 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+// Level mapping for dynamic level handling
+const levelMap: Record<string, string> = {
+  BEGINNER: "BEGINNER",
+  INTERMEDIATE: "INTERMEDIATE",
+  ADVANCED: "ADVANCED",
+};
+
 async function main() {
   // Users
   const [adminPass, subPass, userPass] = await Promise.all([
@@ -27,135 +34,164 @@ async function main() {
     create: { email: "user@lumpsum.in", name: "Normal User", password: userPass, role: "USER" }
   });
 
-  // Mutual Funds (complete data matching schema)
-  const fundsData = [
+  // Learning Chapters
+  const learningChapters = [
     {
-      name: "ICICI Prudential Bluechip Fund",
-      category: "Equity",
-      subCategory: "Large Cap",
-      assetClass: "equity",
-      riskLevel: "moderate",
-      expenseRatio: 1.75,
-      nav: 67.89,
-      fundSize: 25000,
-      minInvestment: 100,
-      benchmark: "NIFTY 100 TRI",
-      fundManager: "Team ICICI",
-      inceptionDate: new Date("2015-05-01"),
-      isActive: true,
-      oneYearReturn: 15.2,
-      threeYearReturn: 18.9,
-      fiveYearReturn: 16.5
+      title: "What are Mutual Funds?",
+      slug: "what-are-mutual-funds",
+      description: "Introduction to mutual funds and their basic concepts",
+      content: `
+# What are Mutual Funds?
+
+A mutual fund is a type of investment vehicle that pools money from multiple investors to purchase a diversified portfolio of stocks, bonds, or other securities.
+
+## Key Concepts
+
+### 1. Professional Management
+Mutual funds are managed by professional fund managers who make investment decisions on behalf of investors.
+
+### 2. Diversification
+By investing in a mutual fund, you get exposure to a wide range of securities, reducing individual stock risk.
+
+### 3. NAV (Net Asset Value)
+The price per unit of a mutual fund, calculated daily based on the total value of the fund's assets minus liabilities.
+
+## Example
+If you invest ₹10,000 in a fund with NAV ₹100, you get 100 units. If NAV increases to ₹110, your investment becomes ₹11,000.
+      `,
+      level: "BEGINNER",
+      order: 1,
+      estimatedTime: 10,
+      category: "Basics",
+      tags: JSON.stringify(["mutual funds", "basics", "introduction"])
     },
     {
-      name: "HDFC Mid-Cap Opportunities Fund",
-      category: "Equity",
-      subCategory: "Mid Cap",
-      assetClass: "equity",
-      riskLevel: "high",
-      expenseRatio: 1.85,
-      nav: 45.67,
-      fundSize: 15000,
-      minInvestment: 100,
-      benchmark: "NIFTY Midcap 150 TRI",
-      fundManager: "Team HDFC",
-      inceptionDate: new Date("2014-04-01"),
-      isActive: true,
-      oneYearReturn: 18.5,
-      threeYearReturn: 22.3,
-      fiveYearReturn: 19.8
+      title: "Types of Mutual Funds",
+      slug: "types-of-mutual-funds",
+      description: "Understanding different categories of mutual funds",
+      content: `
+# Types of Mutual Funds
+
+## 1. Equity Funds
+Invest primarily in stocks and equity-related instruments.
+
+### Large Cap Funds
+- Invest in large, established companies
+- Lower risk, stable returns
+- Examples: HDFC Top 100, ICICI Prudential Bluechip
+
+### Mid Cap Funds
+- Invest in medium-sized companies
+- Moderate risk and return potential
+- Examples: HDFC Mid-Cap Opportunities, Axis Midcap
+
+### Small Cap Funds
+- Invest in small companies
+- Higher risk, higher return potential
+- Examples: Nippon India Small Cap, HDFC Small Cap
+
+## 2. Debt Funds
+Invest in fixed-income securities like bonds and government securities.
+
+### Liquid Funds
+- Ultra-short term investments
+- High liquidity, low risk
+- Examples: HDFC Liquid Fund, ICICI Prudential Liquid
+
+### Corporate Bond Funds
+- Invest in corporate bonds
+- Moderate risk, better returns than liquid funds
+
+## 3. Hybrid Funds
+Mix of equity and debt instruments.
+
+### Balanced Funds
+- 60-70% equity, 30-40% debt
+- Moderate risk and returns
+
+### Conservative Hybrid
+- 10-25% equity, 75-90% debt
+- Lower risk than balanced funds
+      `,
+      level: "BEGINNER",
+      order: 2,
+      estimatedTime: 15,
+      category: "Basics",
+      tags: JSON.stringify(["equity", "debt", "hybrid", "fund types"])
     },
     {
-      name: "Axis Bluechip Fund",
-      category: "Equity",
-      subCategory: "Large Cap",
-      assetClass: "equity",
-      riskLevel: "moderate",
-      expenseRatio: 1.65,
-      nav: 52.34,
-      fundSize: 18000,
-      minInvestment: 100,
-      benchmark: "S&P BSE 100 TRI",
-      fundManager: "Team Axis",
-      inceptionDate: new Date("2016-06-01"),
-      isActive: true,
-      oneYearReturn: 16.8,
-      threeYearReturn: 19.2,
-      fiveYearReturn: 17.1
-    },
-    {
-      name: "SBI Magnum Gilt Fund",
-      category: "Debt",
-      subCategory: "Gilt",
-      assetClass: "debt",
-      riskLevel: "low",
-      expenseRatio: 0.6,
-      nav: 32.1,
-      fundSize: 9000,
-      minInvestment: 100,
-      benchmark: "CRISIL Government Bond Index",
-      fundManager: "Team SBI",
-      inceptionDate: new Date("2012-01-01"),
-      isActive: true,
-      oneYearReturn: 7.1,
-      threeYearReturn: 6.9,
-      fiveYearReturn: 7.4
-    },
-    {
-      name: "Mirae Asset Hybrid Equity Fund",
-      category: "Hybrid",
-      subCategory: "Aggressive Hybrid",
-      assetClass: "hybrid",
-      riskLevel: "moderate",
-      expenseRatio: 1.2,
-      nav: 28.45,
-      fundSize: 6000,
-      minInvestment: 100,
-      benchmark: "CRISIL Hybrid 35+65 Aggressive Index",
-      fundManager: "Team Mirae",
-      inceptionDate: new Date("2017-08-01"),
-      isActive: true,
-      oneYearReturn: 12.4,
-      threeYearReturn: 13.7,
-      fiveYearReturn: 12.9
+      title: "SIP vs Lumpsum Investment",
+      slug: "sip-vs-lumpsum",
+      description: "Understanding Systematic Investment Plan vs one-time investment",
+      content: `
+# SIP vs Lumpsum Investment
+
+## Systematic Investment Plan (SIP)
+
+### What is SIP?
+SIP is a method of investing a fixed amount regularly (monthly, quarterly) in a mutual fund.
+
+### Advantages
+1. **Rupee Cost Averaging**: Buy more units when prices are low
+2. **Discipline**: Forces regular saving habit
+3. **Lower Entry Barrier**: Start with as little as ₹500
+4. **Reduces Timing Risk**: Don't need to time the market
+
+### Example
+Monthly SIP of ₹5,000 for 12 months:
+- Month 1: NAV ₹100 → 50 units
+- Month 6: NAV ₹80 → 62.5 units (more units at lower price)
+- Month 12: NAV ₹120 → 41.67 units
+
+## Lumpsum Investment
+
+### What is Lumpsum?
+Investing a large amount at once in a mutual fund.
+
+### Advantages
+1. **Higher Potential Returns**: If market timing is right
+2. **Immediate Full Exposure**: Get complete market exposure
+3. **Less Transaction Costs**: Single transaction
+
+### When to Choose Lumpsum?
+- Large windfall (bonus, inheritance)
+- Market correction providing good entry point
+- Short-term investment horizon
+
+## Which is Better?
+
+### For Beginners: SIP
+- Start with SIP to build discipline
+- Learn market behavior over time
+- Lower risk of poor timing
+
+### For Experienced Investors: Both
+- Use lumpsum for market corrections
+- Continue SIP for regular investments
+      `,
+      level: "INTERMEDIATE",
+      order: 3,
+      estimatedTime: 12,
+      category: "Investment Strategies",
+      tags: JSON.stringify(["SIP", "lumpsum", "investment strategy", "rupee cost averaging"])
     }
   ];
 
-  await prisma.mutualFund.deleteMany({});
-  await prisma.mutualFund.createMany({ data: fundsData });
-
-  // Sample holdings for user
-  const firstFund = await prisma.mutualFund.findFirst({ where: { subCategory: "Large Cap" } });
-  if (firstFund) {
-    await prisma.portfolioHolding.create({
-      data: {
-        userId: user.id,
-        fundId: firstFund.id,
-        units: 120.5,
-        avgCost: 50,
-        sipAmount: 5000
+  // Create learning chapters
+  for (const chapter of learningChapters) {
+    await prisma.learningChapter.upsert({
+      where: { slug: chapter.slug },
+      update: {},
+      create: {
+        ...chapter,
+        level: levelMap[chapter.level] ?? "BEGINNER"
       }
     });
   }
 
-  // Sample goal
-  await prisma.investmentGoal.create({
-    data: {
-      userId: user.id,
-      name: "Retirement",
-      targetAmount: 5000000,
-      timeHorizon: 20,
-      priority: "high",
-      currentSavings: 250000,
-      monthlyContribution: 15000,
-      projectedValue: 3200000,
-      requiredMonthlyInvestment: 12000,
-      deadline: new Date(new Date().getFullYear() + 20, 0, 1)
-    }
-  });
-
   console.log(
-    "Seed completed.\nAccounts:\n- admin@lumpsum.in / admin123\n- subadmin@lumpsum.in / subadmin123\n- user@lumpsum.in / user123"
+    "Seed completed.\nAccounts created:\n- admin@lumpsum.in\n- subadmin@lumpsum.in\n- user@lumpsum.in\n\nLearning chapters created:",
+    learningChapters.length
   );
 }
 

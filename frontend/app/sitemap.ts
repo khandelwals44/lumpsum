@@ -1,24 +1,44 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://www.lumpsum.in";
+  const baseUrl = getSiteUrl();
   const now = new Date();
 
-  const routes = [
+  // Core pages
+  const coreRoutes = [
     "",
     "/about",
+    "/calculators",
+    "/learning",
+    "/auth/signin",
+    "/auth/signup"
+  ];
+
+  // Calculator routes
+  const calculatorRoutes = [
     "/calculators/emi",
-    "/calculators/sip",
+    "/calculators/sip", 
     "/calculators/lumpsum",
     "/calculators/goal-planner",
     "/calculators/fd",
-    "/calculators/nps"
+    "/calculators/nps",
+    "/calculators/rd",
+    "/calculators/swp",
+    "/calculators/ppf",
+    "/calculators/invest",
+    "/calculators/xirr",
+    "/calculators/step-up-sip",
+    "/calculators/gst",
+    "/calculators/income-tax"
   ];
 
-  return routes.map((r) => ({
-    url: `${base}${r}`,
+  const allRoutes = [...coreRoutes, ...calculatorRoutes];
+
+  return allRoutes.map((route) => ({
+    url: `${baseUrl}${route}`,
     lastModified: now,
-    changeFrequency: "weekly",
-    priority: r === "" ? 1 : 0.8
+    changeFrequency: route === "" ? "daily" : "weekly",
+    priority: route === "" ? 1 : route.startsWith("/calculators") ? 0.9 : 0.8
   }));
 }

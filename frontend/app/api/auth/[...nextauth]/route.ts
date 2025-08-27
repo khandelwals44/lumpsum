@@ -1,5 +1,8 @@
 import NextAuth from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getNextAuthUrl } from "@/src/env.server";
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+export const GET = async (req: Request) => {
+  return NextAuth({ ...authOptions, site: getNextAuthUrl() })(req as any);
+};
+export const POST = GET;

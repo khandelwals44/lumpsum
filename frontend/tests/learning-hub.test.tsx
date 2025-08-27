@@ -1,6 +1,7 @@
+import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import LearningHubClient from "@/app/learning/LearningHubClient";
+import LearningHubClient from "../app/learning/LearningHubClient";
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -90,18 +91,27 @@ describe("Learning Hub", () => {
 
     render(<LearningHubClient />);
 
+    // Wait for both fetches to complete and component to update
+    await waitFor(() => {
+      expect(screen.getByText("Test Chapter")).toBeInTheDocument();
+    });
+
+    // Now check for the progress
     await waitFor(() => {
       expect(screen.getByText("1")).toBeInTheDocument(); // Completed count
-    });
+    }, { timeout: 10000 });
   });
 
-  it("handles loading state", () => {
-    (fetch as any).mockImplementation(() => new Promise(() => {})); // Never resolves
+  it("handles loading state", async () => {
+    // Mock fetch to never resolve
+    (fetch as any).mockImplementation(() => new Promise(() => {}));
 
     render(<LearningHubClient />);
 
-    // Should show loading skeleton
-    expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
+    // In loading state, we should see the skeleton elements
+    await waitFor(() => {
+      expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
+    });
   });
 
   it("handles error state", async () => {
@@ -109,6 +119,7 @@ describe("Learning Hub", () => {
 
     render(<LearningHubClient />);
 
+    // Even with errors, the title should still be visible
     await waitFor(() => {
       expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
     });

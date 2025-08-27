@@ -217,6 +217,8 @@ jobs:
       run: npm audit --audit-level=moderate
 
   # Deploy to Production (only on main branch)
+  # Note: Using native Vercel GitHub App for deployments
+  # Ensure Vercel project has "Automatically expose System Environment Variables" enabled
   deploy:
     runs-on: ubuntu-latest
     needs: [frontend, backend, integration, env-security, security]
@@ -238,10 +240,5 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Deploy to Vercel
-      uses: amondnet/vercel-action@v25
-      with:
-        vercel-token: ${{ secrets.VERCEL_TOKEN }}
-        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-        vercel-args: '--prod'
+    - name: Verify deployment readiness
+      run: echo "Deployment handled by Vercel GitHub App"

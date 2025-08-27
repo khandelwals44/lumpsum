@@ -1,0 +1,93 @@
+import { z } from "zod";
+
+/**
+ * Server-only environment variables schema.
+ * These variables are never exposed to the client.
+ */
+const ServerEnvSchema = z.object({
+  // NextAuth configuration
+  NEXTAUTH_URL: z.string().url().optional(),
+  NEXTAUTH_SECRET: z.string().min(10).optional(),
+  
+  // OAuth providers
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GITHUB_ID: z.string().optional(),
+  GITHUB_SECRET: z.string().optional(),
+  
+  // reCAPTCHA
+  RECAPTCHA_SECRET_KEY: z.string().optional(),
+  
+  // Database
+  DATABASE_URL: z.string().min(1),
+  
+  // Node environment
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+});
+
+type ServerEnv = z.infer<typeof ServerEnvSchema>;
+
+let cachedEnv: ServerEnv | null = null;
+
+/**
+ * Get server environment variables with validation.
+ * Throws with helpful error messages if required variables are missing.
+ */
+export function getServerEnv(): ServerEnv {
+  if (cachedEnv) {
+    return cachedEnv;
+  }
+
+  const parsed = ServerEnvSchema.safeParse(process.env);
+  
+  if (!parsed.success) {
+    const missingKeys = Object.keys(parsed.error.flatten().fieldErrors);
+    
+    const errorMessage = `
+🚨 Missing required environment variables:
+
+${missingKeys.map(key => `  - ${key}`).join('\n')}
+
+📝 To fix this:
+
+LOCAL DEVELOPMENT:
+  1. Copy frontend/env.local.example to frontend/.env.local
+  2. Fill in the required values in frontend/.env.local
+  3. Restart your development server
+
+PRODUCTION:
+  1. Set these variables in your platform's environment settings:
+     - Vercel: Project Settings > Environment Variables
+     - GitHub Actions: Repository Settings > Secrets and variables > Actions
+  2. Redeploy your application
+
+💡 Note: Never commit real values to version control!
+    `.trim();
+
+    throw new Error(errorMessage);
+  }
+
+  cachedEnv = parsed.data;
+  return cachedEnv;
+}
+
+/**
+ * Check if running in development mode
+ */
+export function isDevelopment(): boolean {
+  return getServerEnv().NODE_ENV === "development";
+}
+
+/**
+ * Check if running in production mode
+ */
+export function isProduction(): boolean {
+  return getServerEnv().NODE_ENV === "production";
+}
+
+/**
+ * Check if running in test mode
+ */
+export function isTest(): boolean {
+  return getServerEnv().NODE_ENV === "test";
+}

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { RecaptchaBanner } from "./RecaptchaBanner";
 
 export default function SignUpClient() {
   const router = useRouter();
@@ -45,6 +46,7 @@ export default function SignUpClient() {
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4" aria-label="sign-up-form">
+            <RecaptchaBanner />
             {error && (
               <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
                 {error}

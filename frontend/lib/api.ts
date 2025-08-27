@@ -6,7 +6,7 @@
  *
  * Includes optional JWT Bearer support for calling the separate backend.
  */
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+import { getApiBaseUrl } from "./env.client";
 
 /** In-memory auth token; persisted to localStorage in browsers. */
 let AUTH_TOKEN: string | null = null;
@@ -42,7 +42,8 @@ export function getAuthToken(): string | null {
 /** Resolve a path to an absolute URL if a base is provided. */
 function resolveUrl(path: string) {
   try {
-    return API_BASE ? new URL(path, API_BASE).toString() : path;
+    const apiBase = getApiBaseUrl();
+    return apiBase ? new URL(path, apiBase).toString() : path;
   } catch {
     return path;
   }

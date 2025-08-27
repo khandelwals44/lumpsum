@@ -11,24 +11,26 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { Env } from "@/lib/env";
+import { getServerEnv } from "@/lib/env.server";
 
 const providers: NextAuthOptions["providers"] = [];
 
-if (Env.GOOGLE_CLIENT_ID && Env.GOOGLE_CLIENT_SECRET) {
+const env = getServerEnv();
+
+if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
   providers.push(
     GoogleProvider({
-      clientId: Env.GOOGLE_CLIENT_ID,
-      clientSecret: Env.GOOGLE_CLIENT_SECRET
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET
     })
   );
 }
 
-if (Env.GITHUB_ID && Env.GITHUB_SECRET) {
+if (env.GITHUB_ID && env.GITHUB_SECRET) {
   providers.push(
     GitHubProvider({
-      clientId: Env.GITHUB_ID,
-      clientSecret: Env.GITHUB_SECRET
+      clientId: env.GITHUB_ID,
+      clientSecret: env.GITHUB_SECRET
     })
   );
 }

@@ -17,6 +17,7 @@ import { saveLocal, loadLocal } from "@/lib/persist";
 import { Calculation, SavedCalculation } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 import { Api, getAuthToken } from "@/lib/api";
+import { getApiBaseUrl } from "@/lib/env.client";
 import { CalendarPlus } from "lucide-react";
 export default function LumpsumClient() {
   const sp = useSearchParams();
@@ -87,7 +88,7 @@ export default function LumpsumClient() {
                 };
                 const savedCalculations = loadLocal<SavedCalculation[]>(STORAGE_KEY, []);
                 saveLocal(STORAGE_KEY, [...savedCalculations, { ...newCalculation, id: uuidv4() }]);
-                if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+                if (getAuthToken() && getApiBaseUrl()) {
                   Api.saveCalculation(
                     newCalculation.type,
                     newCalculation.inputs,

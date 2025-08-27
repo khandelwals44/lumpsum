@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { getAppUrl } from "@/lib/env.client";
+import { RecaptchaBanner } from "./RecaptchaBanner";
 
 export default function SignInClient() {
   const sp = useSearchParams();
@@ -20,7 +22,7 @@ export default function SignInClient() {
   const target = sp?.get("callbackUrl") || "/dashboard";
   const callbackUrl = useMemo(() => {
     const base =
-      typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
+      typeof window !== "undefined" ? window.location.origin : getAppUrl();
     try {
       // eslint-disable-next-line no-new
       new URL(target);
@@ -70,6 +72,7 @@ export default function SignInClient() {
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4" aria-label="sign-in-form">
+            <RecaptchaBanner />
             {error && (
               <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
                 {error}

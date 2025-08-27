@@ -1,0 +1,41 @@
+{
+  "name": "lumpsum-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for lumpsum.in - High-end Goal-based Mutual Fund Recommendation Platform",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "start": "npm run start --workspace=frontend",
+    "start:frontend": "npm run start --workspace=frontend",
+    "start:backend": "npm run start --workspace=backend",
+    "build": "npm run build --workspaces",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "build:vercel": "cd frontend && npm install && npm run build",
+    "build:vercel-alt": "npm run build --workspace=frontend",
+    "build:vercel-fix": "cd frontend && npm install && npm run build",
+    "test": "npm run test --workspaces",
+    "test:frontend": "npm run test --workspace=frontend",
+    "test:backend": "npm run test --workspace=backend",
+    "lint": "npm run lint --workspaces",
+    "typecheck": "npm run typecheck --workspaces",
+    "db:push": "npm run db:push --workspace=backend",
+    "db:migrate": "npm run db:migrate --workspace=backend",
+    "db:seed": "npm run db:seed --workspace=backend",
+    "db:seed:learning": "npm run db:seed:learning --workspace=frontend",
+    "test:integration": "npm run test:frontend && npm run test:backend",
+    "test:coverage": "npm run test:frontend -- --coverage && npm run test:backend -- --coverage"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}

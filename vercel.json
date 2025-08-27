@@ -1,0 +1,16 @@
+{
+  "buildCommand": "cd frontend && npm install --include=dev && npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "outputDirectory": "frontend/.next",
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "regions": ["iad1"],
+  "public": true
+}

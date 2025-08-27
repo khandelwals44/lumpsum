@@ -1,0 +1,15 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Running pre-push checks..."
+
+# Run environment usage checker
+echo "Checking for server environment variable usage in client code..."
+./scripts/check-env-usage.sh
+
+# Run basic verification
+echo "Running basic verification..."
+npm run lint
+npm run typecheck
+
+echo "Pre-push checks completed successfully!"

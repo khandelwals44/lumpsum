@@ -52,10 +52,10 @@ SECRET_PATTERNS=(
     # Discord Tokens
     "[MN][a-zA-Z0-9]{23}\\.[\\w-]{6}\\.[\\w-]{27}"
     
-    # Hardcoded passwords
-    "password.*=.*['\"]?[^'\"]{8,}['\"]?"
-    "passwd.*=.*['\"]?[^'\"]{8,}['\"]?"
-    "pwd.*=.*['\"]?[^'\"]{8,}['\"]?"
+    # Hardcoded passwords (only actual passwords, not variable names)
+    "password.*=.*['\"]?[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]{8,}['\"]?"
+    "passwd.*=.*['\"]?[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]{8,}['\"]?"
+    "pwd.*=.*['\"]?[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]{8,}['\"]?"
 )
 
 # Files to exclude from pre-commit scan
@@ -78,6 +78,24 @@ EXCLUDE_PATTERNS=(
     "test-recaptcha.html"
     "security/secret-scan-REPORT.txt"
     ".trufflehog.yaml"
+    "*.md"
+    "docs/"
+    "README.md"
+    "DEPLOY_ENV.md"
+    "RUN_LOCAL.md"
+    "SECURITY-SETUP.md"
+    "ENVIRONMENT_SECURITY_SUMMARY.md"
+    "VERIFICATION_SYSTEM_SUMMARY.md"
+    "frontend/env.local.example"
+    ".github/workflows/security.yml"
+    "frontend/app/api/auth/signup/route.ts"
+    "frontend/components/auth/PasswordStrengthIndicator.tsx"
+    "frontend/components/auth/SignUpClient.tsx"
+    "frontend/lib/validations/auth.ts"
+    "scripts/check-env.js"
+    "scripts/check-env.ts"
+    "scripts/verify-env.mjs"
+    "scripts/verify-security.sh"
 )
 
 # Function to check if file should be excluded

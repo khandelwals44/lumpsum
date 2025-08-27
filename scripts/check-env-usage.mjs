@@ -153,15 +153,17 @@ const checkEnvironmentUsage = () => {
       const envUsage = extractEnvUsage(content, file);
       const serverImports = checkServerImports(content, file);
       
-      // Check for non-public environment variables in client files
-      const nonPublicUsage = envUsage.filter(usage => !usage.isPublic && usage.variable !== 'NODE_ENV');
-      if (nonPublicUsage.length > 0) {
-        hasErrors = true;
-        errors.push({
-          file,
-          type: 'non-public-env',
-          details: nonPublicUsage
-        });
+      // Only check client files for non-public environment variables
+      if (isClientFile(file)) {
+        const nonPublicUsage = envUsage.filter(usage => !usage.isPublic && usage.variable !== 'NODE_ENV');
+        if (nonPublicUsage.length > 0) {
+          hasErrors = true;
+          errors.push({
+            file,
+            type: 'non-public-env',
+            details: nonPublicUsage
+          });
+        }
       }
       
       // Check for server imports in client files (but allow in API routes)

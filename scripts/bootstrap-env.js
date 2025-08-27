@@ -34,7 +34,7 @@ const logBold = (message) => log(colors.bold, message);
 const envConfigs = [
   {
     file: 'frontend/.env.local',
-    template: 'frontend/.env.local.example',
+    template: 'frontend/env.example',
     required: [
       'DATABASE_URL',
       'NEXTAUTH_SECRET',

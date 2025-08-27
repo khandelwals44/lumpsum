@@ -12,6 +12,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { serverEnv } from "@/lib/env.server";
+import { getNextAuthUrl } from "@/src/env.server";
 
 const providers: NextAuthOptions["providers"] = [];
 
@@ -48,6 +49,7 @@ providers.push(
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers,
+  secret: serverEnv.NEXTAUTH_SECRET,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   callbacks: {
     async jwt({ token, user }) {

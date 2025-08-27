@@ -19,7 +19,7 @@ import { z } from 'zod';
 // Only NEXT_PUBLIC_* variables are allowed
 const clientEnvSchema = z.object({
   // API Configuration
-  NEXT_PUBLIC_API_BASE_URL: z.string().url('NEXT_PUBLIC_API_BASE_URL must be a valid URL').optional(),
+  NEXT_PUBLIC_API_BASE_URL: z.string().optional(),
   
   // Analytics
   NEXT_PUBLIC_GA_ID: z.string().optional(),

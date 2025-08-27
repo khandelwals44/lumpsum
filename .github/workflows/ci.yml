@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [ main, release/V_2.0 ]
+    branches: [ main, release/V_2.0, feature/vsCode-complete ]
   push:
-    branches: [ feature/vsCode-complete, chore/preview-env-and-ci-parity ]
+    branches: [ feature/vsCode-complete, chore/preview-env-and-ci-parity, main, release/V_2.0 ]
 
 jobs:
   prisma-generate:

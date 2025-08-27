@@ -28,7 +28,8 @@ jobs:
           echo 'RECAPTCHA_SECRET_KEY="test"' >> frontend/.env
         working-directory: frontend
       - name: Prisma generate
-        run: npx prisma generate --schema frontend/prisma/schema.prisma
+        run: node scripts/prisma-generate.js
+        working-directory: frontend
       - name: Lint
         run: npm run lint
         working-directory: frontend

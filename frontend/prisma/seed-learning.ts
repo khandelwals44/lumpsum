@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, LearningLevel, LearningCategory } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -30,10 +30,10 @@ Mutual funds are investment vehicles that pool money from multiple investors to 
 ## Example:
 If you invest ₹10,000 in a fund with NAV ₹100, you get 100 units. If NAV increases to ₹110, your investment becomes ₹11,000.
     `,
-    level: "BEGINNER" as const,
+    level: LearningLevel.BEGINNER,
     order: 1,
     estimatedTime: 10,
-    category: "Mutual Fund Basics",
+    category: LearningCategory.BASICS,
     tags: JSON.stringify(["basics", "introduction", "fundamentals"])
   },
   {
@@ -91,10 +91,10 @@ Mutual funds can be classified based on various criteria:
 - Low expense ratio
 - Passive management
     `,
-    level: "BEGINNER" as const,
+    level: LearningLevel.BEGINNER,
     order: 2,
     estimatedTime: 15,
-    category: "Mutual Fund Basics",
+    category: LearningCategory.BASICS,
     tags: JSON.stringify(["types", "classification", "equity", "debt", "hybrid"])
   },
   {
@@ -147,10 +147,10 @@ NAV = (Total Assets - Total Liabilities) / Number of Outstanding Units
 - Compare funds within the same category
 - Consider expense ratio impact on returns
     `,
-    level: "BEGINNER" as const,
+    level: LearningLevel.BEGINNER,
     order: 3,
     estimatedTime: 12,
-    category: "Mutual Fund Basics",
+    category: LearningCategory.BASICS,
     tags: JSON.stringify(["nav", "returns", "cagr", "calculation"])
   },
   {
@@ -207,10 +207,10 @@ A 1% expense ratio means ₹1 is deducted for every ₹100 invested annually.
 - Actively managed funds have higher ratios (1-2%)
 - Compare within same category
     `,
-    level: "BEGINNER" as const,
+    level: LearningLevel.BEGINNER,
     order: 4,
     estimatedTime: 10,
-    category: "Mutual Fund Basics",
+    category: LearningCategory.BASICS,
     tags: JSON.stringify(["expense ratio", "charges", "fees", "costs"])
   },
   {
@@ -275,10 +275,10 @@ Risk is the possibility of losing money or not achieving expected returns. All i
 - Long-term investment approach
 - Avoid timing the market
     `,
-    level: "BEGINNER" as const,
+    level: LearningLevel.BEGINNER,
     order: 5,
     estimatedTime: 12,
-    category: "Mutual Fund Basics",
+    category: LearningCategory.BASICS,
     tags: JSON.stringify(["risk", "volatility", "standard deviation", "beta"])
   }
 ];

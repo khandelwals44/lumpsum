@@ -18,8 +18,8 @@ const ServerEnvSchema = z.object({
   // reCAPTCHA
   RECAPTCHA_SECRET_KEY: z.string().optional(),
   
-  // Database
-  DATABASE_URL: z.string().min(1),
+  // Database (optional during build, required at runtime)
+  DATABASE_URL: z.string().min(1).optional(),
   
   // Node environment
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -69,6 +69,46 @@ PRODUCTION:
 
   cachedEnv = parsed.data;
   return cachedEnv;
+}
+
+/**
+ * Validate required environment variables at runtime.
+ * Call this function when the app starts to ensure all required variables are present.
+ */
+export function validateRuntimeEnv(): void {
+  const env = getServerEnv();
+  
+  // Check for required variables at runtime
+  const requiredVars: Array<{ key: string; value: string | undefined; description: string }> = [
+    { key: 'DATABASE_URL', value: env.DATABASE_URL, description: 'Database connection string' },
+  ];
+  
+  const missing = requiredVars.filter(v => !v.value);
+  
+  if (missing.length > 0) {
+    const errorMessage = `
+🚨 Missing required runtime environment variables:
+
+${missing.map(v => `  - ${v.key}: ${v.description}`).join('\n')}
+
+📝 To fix this:
+
+LOCAL DEVELOPMENT:
+  1. Copy frontend/env.local.example to frontend/.env.local
+  2. Fill in the required values in frontend/.env.local
+  3. Restart your development server
+
+PRODUCTION:
+  1. Set these variables in your platform's environment settings:
+     - Vercel: Project Settings > Environment Variables
+     - GitHub Actions: Repository Settings > Secrets and variables > Actions
+  2. Redeploy your application
+
+💡 Note: Never commit real values to version control!
+    `.trim();
+
+    throw new Error(errorMessage);
+  }
 }
 
 /**

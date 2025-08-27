@@ -6,6 +6,7 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
-import { isProduction } from "./env.server";
-
-if (!isProduction()) globalForPrisma.prisma = prisma;
+// Only set global in development to avoid multiple instances
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}

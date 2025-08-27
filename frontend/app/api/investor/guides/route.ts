@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
       data: {
         userId: user.id,
         title,
-        goals,
+        goals: JSON.stringify(goals),
         description: title, // Use title as description for now
-        recommendations: goals // Use goals as recommendations for now
+        recommendations: JSON.stringify(goals) // Use goals as recommendations for now
       }
     });
 

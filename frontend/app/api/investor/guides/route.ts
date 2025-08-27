@@ -20,7 +20,7 @@ export async function GET() {
 
     const guides = await prisma.investorGuide.findMany({
       where: { userId: user.id },
-      orderBy: { updatedAt: "desc" }
+      orderBy: { createdAt: "desc" }
     });
 
     return NextResponse.json(guides);
@@ -46,13 +46,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, goals, riskProfile, timeHorizon } = body;
+    const { title, goals, riskProfile, timeHorizon } = body;
 
     const guide = await prisma.investorGuide.create({
       data: {
         userId: user.id,
         title,
-        content,
         goals,
         riskProfile,
         timeHorizon

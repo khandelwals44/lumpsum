@@ -11,15 +11,17 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { serverEnv } from "@/lib/env.server";
+import { getRequiredEnvVars } from "@/src/env.server";
 
 const providers: NextAuthOptions["providers"] = [];
 
-if (serverEnv.GOOGLE_CLIENT_ID && serverEnv.GOOGLE_CLIENT_SECRET) {
+// Google provider will be added at runtime if credentials are available
+const envVars = getRequiredEnvVars();
+if (envVars.GOOGLE_CLIENT_ID && envVars.GOOGLE_CLIENT_SECRET) {
   providers.push(
     GoogleProvider({
-      clientId: serverEnv.GOOGLE_CLIENT_ID,
-      clientSecret: serverEnv.GOOGLE_CLIENT_SECRET
+      clientId: envVars.GOOGLE_CLIENT_ID,
+      clientSecret: envVars.GOOGLE_CLIENT_SECRET
     })
   );
 }

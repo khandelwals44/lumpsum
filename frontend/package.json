@@ -15,7 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "echo 'Skipping husky install in production'",
-    "postinstall": "prisma generate --schema ./prisma/schema.prisma",
+    "postinstall": "node scripts/prisma-generate.js",
     "prisma:pull": "prisma db pull --schema ./prisma/schema.prisma",
     "prisma:generate": "prisma generate --schema ./prisma/schema.prisma",
     "prebuild": "npm run prisma:generate",

@@ -1,7 +1,10 @@
 import NextAuth from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getNextAuthUrl } from "@/src/env.server";
 
-export const GET = async (req: Request) => {
-  return NextAuth(authOptions)(req as any);
-};
+export const dynamic = 'force-dynamic'; // ensure no static assumptions during build
+
+export const GET = (req: Request) =>
+  NextAuth(authOptions)(req as any);
+
 export const POST = GET;

@@ -11,27 +11,23 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { Env } from "@/lib/env";
+import { getOAuthConfig, getNextAuthConfig } from "@/lib/env.server";
 
 const providers: NextAuthOptions["providers"] = [];
 
-if (Env.GOOGLE_CLIENT_ID && Env.GOOGLE_CLIENT_SECRET) {
+// Get OAuth configuration
+const oauthConfig = getOAuthConfig();
+
+if (oauthConfig.google.clientId && oauthConfig.google.clientSecret) {
   providers.push(
     GoogleProvider({
-      clientId: Env.GOOGLE_CLIENT_ID,
-      clientSecret: Env.GOOGLE_CLIENT_SECRET
+      clientId: oauthConfig.google.clientId,
+      clientSecret: oauthConfig.google.clientSecret
     })
   );
 }
 
-if (Env.GITHUB_ID && Env.GITHUB_SECRET) {
-  providers.push(
-    GitHubProvider({
-      clientId: Env.GITHUB_ID,
-      clientSecret: Env.GITHUB_SECRET
-    })
-  );
-}
+// Note: GitHub provider removed as it's not in the new environment schema
 
 providers.push(
   CredentialsProvider({
@@ -54,9 +50,13 @@ providers.push(
   })
 );
 
+// Get NextAuth configuration
+const nextAuthConfig = getNextAuthConfig();
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers,
+  secret: nextAuthConfig.secret,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   callbacks: {
     async jwt({ token, user }) {

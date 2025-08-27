@@ -10,11 +10,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Level {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
+// Level enum values as strings
+// BEGINNER, INTERMEDIATE, ADVANCED
 
 model Account {
   id                String  @id @default(cuid())
@@ -183,7 +180,7 @@ model LearningChapter {
   slug          String   @unique
   description   String?
   content       String   @db.Text
-  level         Level    @default(BEGINNER)
+  level         String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
   order         Int
   estimatedTime Int      // in minutes
   isActive      Boolean  @default(true)

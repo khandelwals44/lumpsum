@@ -1,13 +1,13 @@
-import { PrismaClient, Level } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 // Level mapping for dynamic level handling
-const levelMap: Record<string, Level> = {
-  BEGINNER: Level.BEGINNER,
-  INTERMEDIATE: Level.INTERMEDIATE,
-  ADVANCED: Level.ADVANCED,
+const levelMap: Record<string, string> = {
+  BEGINNER: "BEGINNER",
+  INTERMEDIATE: "INTERMEDIATE",
+  ADVANCED: "ADVANCED",
 };
 
 async function main() {
@@ -184,7 +184,7 @@ Investing a large amount at once in a mutual fund.
       update: {},
       create: {
         ...chapter,
-        level: levelMap[chapter.level] ?? Level.BEGINNER
+        level: levelMap[chapter.level] ?? "BEGINNER"
       }
     });
   }

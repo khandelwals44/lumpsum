@@ -8,6 +8,7 @@
     "backend"
   ],
   "scripts": {
+    "postinstall": "node ./scripts/bootstrap-env.js",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
@@ -30,10 +31,15 @@
     "db:seed": "npm run db:seed --workspace=backend",
     "db:seed:learning": "npm run db:seed:learning --workspace=frontend",
     "test:integration": "npm run test:frontend && npm run test:backend",
-    "test:coverage": "npm run test:frontend -- --coverage && npm run test:backend -- --coverage"
+    "test:coverage": "npm run test:frontend -- --coverage && npm run test:backend -- --coverage",
+    "verify:security": "bash scripts/verify-security.sh",
+    "verify:env": "node scripts/check-env-usage.mjs",
+    "bootstrap:env": "ts-node ./scripts/bootstrap-env.ts || node ./scripts/bootstrap-env.js",
+    "check:env": "ts-node ./scripts/check-env.ts || node ./scripts/check-env.js"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "ts-node": "^10.9.2"
   },
   "engines": {
     "node": ">=18.18.0"

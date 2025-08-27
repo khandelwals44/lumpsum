@@ -10,6 +10,8 @@ import { AuthButtons } from "@/components/AuthButtons";
 import { ClientSession } from "@/components/ClientSession";
 import { Button } from "@/components/ui/button";
 import { Home, Target, BarChart3, User, Calculator, BookOpen } from "lucide-react";
+import { logEnvSummary, logConfig } from "@/lib/logSafe";
+import { DebugWrapper } from "@/components/DebugWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -63,6 +65,12 @@ const navigation = [
 ];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Log environment and config in development
+  if (typeof window !== 'undefined') {
+    logEnvSummary();
+    logConfig();
+  }
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
@@ -85,7 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ClientSession>
-            <header className="sticky top-0 z-40 w-full border-b border-zinc-200/50 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 dark:border-zinc-800/50 dark:bg-zinc-950/80">
+            <header className="sticky top-0 z-50 w-full border-b border-zinc-200/50 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/50 dark:border-zinc-800/50 dark:bg-zinc-950/80">
               <div className="container flex h-16 items-center justify-between">
                 <Link href="/" className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -116,7 +124,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </header>
 
             {/* Mobile Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-zinc-200/50 dark:bg-zinc-950/80 dark:border-zinc-800/50">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-zinc-200/50 dark:bg-zinc-950/80 dark:border-zinc-800/50">
               <div className="flex justify-around py-2">
                 {navigation.map((item) => (
                   <Link
@@ -150,6 +158,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </footer>
             <AnalyticsSlot />
             <RegisterSW />
+            <DebugWrapper />
           </ClientSession>
         </ThemeProvider>
       </body>

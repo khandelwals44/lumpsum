@@ -7,13 +7,12 @@ export async function GET(request: NextRequest, { params }: { params: { chapterI
       where: { id: params.chapterId },
       include: {
         quizzes: {
-          where: { isActive: true },
-          orderBy: { order: "asc" },
           select: {
             id: true,
             question: true,
             options: true,
-            order: true
+            correctAnswer: true,
+            explanation: true
           }
         }
       }

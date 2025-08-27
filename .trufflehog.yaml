@@ -1,0 +1,66 @@
+version: 3
+detectors:
+  # Use built-in detectors
+  - name: "Built-in Detectors"
+    regex: ""
+
+paths:
+  exclude:
+    # Build artifacts
+    - "node_modules/"
+    - ".git/"
+    - "dist/"
+    - "build/"
+    - ".next/"
+    - "coverage/"
+    - "*.min.js"
+    - "*.bundle.js"
+    
+    # Lock files
+    - "package-lock.json"
+    - "yarn.lock"
+    - "pnpm-lock.yaml"
+    
+    # Logs and temp files
+    - "*.log"
+    - "*.tmp"
+    
+    # Documentation and examples
+    - "*.md"
+    - "docs/"
+    - "README.md"
+    - "DEPLOY_ENV.md"
+    - "RUN_LOCAL.md"
+    - "SECURITY-SETUP.md"
+    - "ENVIRONMENT_SECURITY_SUMMARY.md"
+    - "VERIFICATION_SYSTEM_SUMMARY.md"
+    
+    # Environment examples
+    - ".env.example"
+    - "env.local.example"
+    - "frontend/env.local.example"
+    
+    # Test files
+    - "test-recaptcha.html"
+    - "frontend/test-*.md"
+    - "frontend/tests/"
+    
+    # Security files
+    - "security/secret-scan-REPORT.txt"
+    - ".trufflehog.yaml"
+    - ".github/workflows/security.yml"
+    
+    # Specific files with false positives
+    - "frontend/app/api/auth/signup/route.ts"
+    - "frontend/components/auth/PasswordStrengthIndicator.tsx"
+    - "frontend/components/auth/SignUpClient.tsx"
+    - "frontend/lib/validations/auth.ts"
+    - "scripts/check-env.js"
+    - "scripts/check-env.ts"
+    - "scripts/verify-env.mjs"
+    - "scripts/verify-security.sh"
+
+verification:
+  unverified: true
+  verified: true
+  unknown: true

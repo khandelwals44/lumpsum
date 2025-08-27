@@ -1,11 +1,12 @@
 "use client";
 import { useEffect } from "react";
+import { isProduction } from '@/lib/env.client';
 
 export function RegisterSW() {
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
-    const isProd = process.env.NODE_ENV === "production";
+    const isProd = isProduction;
 
     if (!isProd) {
       // In dev, make sure no SW interferes with HMR or _next chunks

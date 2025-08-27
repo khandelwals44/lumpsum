@@ -6,7 +6,9 @@
  *
  * Includes optional JWT Bearer support for calling the separate backend.
  */
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+import { getApiConfig } from '@/lib/env.client';
+
+const API_BASE = getApiConfig().baseUrl;
 
 /** In-memory auth token; persisted to localStorage in browsers. */
 let AUTH_TOKEN: string | null = null;
@@ -30,13 +32,6 @@ export function setAuthToken(token: string | null) {
     if (token) window.localStorage.setItem("authToken", token);
     else window.localStorage.removeItem("authToken");
   }
-}
-
-/**
- * Get current JWT bearer token (if any).
- */
-export function getAuthToken(): string | null {
-  return AUTH_TOKEN;
 }
 
 /** Resolve a path to an absolute URL if a base is provided. */

@@ -1,0 +1,178 @@
+# Git attributes for lumpsum.in
+# Prevents accidental storage of sensitive files
+
+# Environment files - should never be committed
+.env* filter=git-crypt diff=git-crypt
+*.env filter=git-crypt diff=git-crypt
+
+# Secret files - should never be committed
+*.pem filter=git-crypt diff=git-crypt
+*.key filter=git-crypt diff=git-crypt
+*.p12 filter=git-crypt diff=git-crypt
+*.pfx filter=git-crypt diff=git-crypt
+*.crt filter=git-crypt diff=git-crypt
+*.cer filter=git-crypt diff=git-crypt
+*.der filter=git-crypt diff=git-crypt
+*.p7b filter=git-crypt diff=git-crypt
+*.p7c filter=git-crypt diff=git-crypt
+
+# Private keys
+id_rsa filter=git-crypt diff=git-crypt
+id_dsa filter=git-crypt diff=git-crypt
+id_ecdsa filter=git-crypt diff=git-crypt
+id_ed25519 filter=git-crypt diff=git-crypt
+*.pub filter=git-crypt diff=git-crypt
+
+# Database files
+*.db filter=git-crypt diff=git-crypt
+*.sqlite filter=git-crypt diff=git-crypt
+*.sqlite3 filter=git-crypt diff=git-crypt
+
+# Log files - should not be committed
+*.log filter=git-crypt diff=git-crypt
+logs/ filter=git-crypt diff=git-crypt
+
+# Temporary files
+*.tmp filter=git-crypt diff=git-crypt
+*.temp filter=git-crypt diff=git-crypt
+*.swp filter=git-crypt diff=git-crypt
+*.swo filter=git-crypt diff=git-crypt
+*~ filter=git-crypt diff=git-crypt
+
+# OS generated files
+.DS_Store filter=git-crypt diff=git-crypt
+Thumbs.db filter=git-crypt diff=git-crypt
+ehthumbs.db filter=git-crypt diff=git-crypt
+
+# IDE files
+.vscode/ filter=git-crypt diff=git-crypt
+.idea/ filter=git-crypt diff=git-crypt
+*.sublime-* filter=git-crypt diff=git-crypt
+
+# Build artifacts
+dist/ filter=git-crypt diff=git-crypt
+build/ filter=git-crypt diff=git-crypt
+.next/ filter=git-crypt diff=git-crypt
+out/ filter=git-crypt diff=git-crypt
+
+# Dependencies
+node_modules/ filter=git-crypt diff=git-crypt
+vendor/ filter=git-crypt diff=git-crypt
+
+# Coverage reports
+coverage/ filter=git-crypt diff=git-crypt
+*.lcov filter=git-crypt diff=git-crypt
+
+# Security reports
+security/secret-scan-REPORT.txt filter=git-crypt diff=git-crypt
+security/*.txt filter=git-crypt diff=git-crypt
+
+# Test files with secrets
+test-recaptcha.html filter=git-crypt diff=git-crypt
+
+# Binary files
+*.exe filter=git-crypt diff=git-crypt
+*.dll filter=git-crypt diff=git-crypt
+*.so filter=git-crypt diff=git-crypt
+*.dylib filter=git-crypt diff=git-crypt
+*.bin filter=git-crypt diff=git-crypt
+
+# Archive files
+*.zip filter=git-crypt diff=git-crypt
+*.tar.gz filter=git-crypt diff=git-crypt
+*.rar filter=git-crypt diff=git-crypt
+*.7z filter=git-crypt diff=git-crypt
+
+# Text files that should be treated as text
+*.md text
+*.txt text
+*.json text
+*.yaml text
+*.yml text
+*.js text
+*.ts text
+*.tsx text
+*.jsx text
+*.css text
+*.scss text
+*.html text
+*.xml text
+*.svg text
+*.sh text
+*.py text
+*.rb text
+*.php text
+*.java text
+*.c text
+*.cpp text
+*.h text
+*.hpp text
+*.go text
+*.rs text
+*.swift text
+*.kt text
+*.scala text
+*.clj text
+*.hs text
+*.ml text
+*.fs text
+*.vb text
+*.cs text
+*.sql text
+*.r text
+*.m text
+*.pl text
+*.pm text
+*.t text
+*.pod text
+*.tex text
+*.ltx text
+*.sty text
+*.cls text
+*.bib text
+*.bst text
+*.aux text
+*.log text
+*.out text
+*.toc text
+*.lof text
+*.lot text
+*.fls text
+*.fdb_latexmk text
+*.synctex.gz text
+*.bbl text
+*.blg text
+*.dvi text
+*.ps text
+*.eps text
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.tiff binary
+*.tif binary
+*.webp binary
+*.mp3 binary
+*.mp4 binary
+*.avi binary
+*.mov binary
+*.wmv binary
+*.flv binary
+*.wav binary
+*.ogg binary
+*.m4a binary
+*.m4v binary
+*.3gp binary
+*.mkv binary
+*.webm binary
+*.swf binary
+*.fla binary
+*.xfl binary
+*.f4v binary
+*.f4p binary
+*.f4a binary
+*.f4b binary
+

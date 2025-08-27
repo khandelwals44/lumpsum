@@ -1,282 +1,328 @@
-# 🚀 lumpsum.in - Mutual Fund Learning & Advisory Platform
+# lumpsum.in - High-end Goal-based Mutual Fund Recommendation Platform
 
-A production-grade, SEO-friendly Next.js + TypeScript monorepo for the world's most comprehensive mutual fund learning and advisory platform.
+Transform your financial future with AI-powered mutual fund recommendations. Personalized investment plans, goal tracking, and expert insights.
 
-## 📁 Project Structure
+## 🚀 Tech Stack
 
-```
-lumpsum-1/
-├── frontend/                 # Next.js Frontend Application
-│   ├── app/                 # Next.js App Router pages
-│   ├── components/          # React components
-│   ├── lib/                 # Utility functions and configurations
-│   ├── public/              # Static assets
-│   ├── styles/              # Global styles
-│   ├── tests/               # Frontend tests
-│   └── docs/                # Swagger documentation (copied from backend)
-├── backend/                 # Express.js Backend API
-│   ├── src/                 # Backend source code
-│   ├── prisma/              # Database schema and migrations
-│   ├── docs/                # API documentation
-│   └── tests/               # Backend tests
-├── package.json             # Root monorepo configuration
-├── docker-compose.yml       # Multi-service Docker setup
-├── Dockerfile               # Frontend Docker configuration
-├── Dockerfile.backend       # Backend Docker configuration
-└── vercel.json              # Vercel deployment configuration
-```
+- **Frontend**: Next.js 14 (App Router) + TypeScript + Tailwind CSS
+- **Backend**: Node.js + Express + TypeScript
+- **Database**: PostgreSQL (Neon) + Prisma ORM
+- **Authentication**: NextAuth.js + Google OAuth
+- **Security**: reCAPTCHA v3 + JWT
+- **Deployment**: Vercel (Frontend) + Railway/Vercel (Backend)
 
-## 🛠️ Technology Stack
+## 📋 Prerequisites
 
-### Frontend (Next.js)
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Animations**: Framer Motion
-- **Charts**: Recharts
-- **Authentication**: NextAuth.js
-- **Testing**: Vitest + React Testing Library
+- Node.js 18+ 
+- npm 10+
+- PostgreSQL database (Neon recommended)
+- Google Cloud Console account
+- Google reCAPTCHA account
 
-### Backend (Express.js)
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: Prisma ORM + PostgreSQL
-- **Authentication**: JWT
-- **Documentation**: Swagger/OpenAPI
-- **Testing**: Jest + Supertest
+## 🔧 Environment Setup
 
-### Infrastructure
-- **Database**: PostgreSQL (production), SQLite (development)
-- **Deployment**: Vercel (frontend), Railway/Render (backend)
-- **Containerization**: Docker + Docker Compose
-- **CI/CD**: GitHub Actions
+### Local Development
 
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18.18.0+
-- npm or yarn
-- PostgreSQL (for production)
-
-### Development Setup
-
-1. **Clone and Install Dependencies**
+1. **Clone the repository**
    ```bash
    git clone <repository-url>
    cd lumpsum-1
+   ```
+
+2. **Install dependencies**
+   ```bash
    npm install
    ```
 
-2. **Environment Setup**
-   ```bash
-   # Create environment files
-   cp .env.example .env
-   cp frontend/.env.example frontend/.env
-   cp backend/.env.example backend/.env
-   ```
-
-3. **Database Setup**
-   ```bash
-   # For development (SQLite)
-   npm run db:push
-   npm run db:seed:learning
+3. **Set up environment variables**
    
-   # For production (PostgreSQL)
-   npm run db:migrate
-   npm run db:seed:learning
-   ```
-
-4. **Start Development Servers**
+   Copy the example file and fill in your values:
    ```bash
-   # Start both frontend and backend
-   npm run dev
-   
-   # Or start individually
-   npm run dev:frontend  # Frontend on http://localhost:3000
-   npm run dev:backend   # Backend on http://localhost:4000
+   cp frontend/env.local.example frontend/.env.local
    ```
 
-## 📚 Features
+   **Required environment variables for `frontend/.env.local`:**
+   
+   ```env
+   # Database (Server-only)
+   DATABASE_URL=postgresql://username:password@localhost:5432/lumpsum_dev
+   
+   # NextAuth (Server-only)
+   NEXTAUTH_SECRET=your-32-character-secret-key-here
+   NEXTAUTH_URL=http://localhost:3000
+   
+   # Google OAuth (Server-only)
+   GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+   
+   # reCAPTCHA
+   NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6Lxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   RECAPTCHA_SECRET_KEY=6Lxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   
+   # API Configuration
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+   API_BASE_URL=http://localhost:3001
+   ```
 
-### 🎓 Mutual Fund University (Learning Hub)
-- **Comprehensive Curriculum**: 50+ chapters from basics to advanced
-- **Interactive Learning**: Quizzes, progress tracking, bookmarks
-- **Personalized Experience**: Save progress, take notes, earn badges
-- **Export Capabilities**: Generate PDF guides and notes
+   **Optional variables:**
+   ```env
+   # JWT (Server-only, optional - falls back to NEXTAUTH_SECRET)
+   JWT_SECRET=your-jwt-secret-key-here
+   
+   # Analytics (Client-safe)
+   NEXT_PUBLIC_GA_ID=
+   
+   # Debug (Client-safe)
+   NEXT_PUBLIC_DEBUG_SAFE=1
+   DEBUG_SAFE=1
+   
+   # Server Configuration (Server-only)
+   PORT=3001
+   NODE_ENV=development
+   ```
 
-### 🧮 Advanced Calculators
-- **Investment Calculators**: SIP, Lumpsum, Goal Planner, XIRR
-- **Tax Calculators**: Income Tax, GST, Capital Gains
-- **Retirement Planning**: NPS, PPF, FD, RD
-- **Advanced Features**: Save results, share links, export PDF/CSV
+### Production/Preview Deployment
 
-### 📊 Portfolio Management
-- **Portfolio Tracking**: Manual entry and CSV import
-- **Asset Allocation**: Visual breakdown and recommendations
-- **Performance Analysis**: XIRR calculations and historical data
-- **Goal-based Planning**: Link investments to financial goals
+Set the same environment variables in **Vercel Project Settings → Environment Variables**:
 
-### 🔍 Mutual Fund Explorer
-- **Live NAV Data**: Real-time mutual fund information
-- **Advanced Filters**: Category, rating, performance, risk
-- **Comparison Tools**: Side-by-side fund analysis
-- **Research Reports**: Detailed fund analysis and insights
+1. Go to your Vercel project dashboard
+2. Navigate to Settings → Environment Variables
+3. Add all the variables above with production values
+4. Redeploy for changes to apply
 
-### 👤 User Management
-- **Authentication**: Google, GitHub, Email, Credentials
-- **User Profiles**: Personal information and preferences
-- **Investment Goals**: Goal setting and tracking
-- **Calculation History**: Save and revisit past calculations
+### Generating Secrets
 
-## 🏗️ Development Commands
-
-### Root Level (Monorepo)
+**NEXTAUTH_SECRET:**
 ```bash
-npm run dev              # Start both frontend and backend
-npm run build            # Build both applications
-npm run test             # Run all tests
-npm run lint             # Lint all code
-npm run typecheck        # Type check all code
+# Using OpenSSL
+openssl rand -base64 32
+
+# Using Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-### Frontend Only
+## 🛠️ Installation & Bootstrap
+
+1. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Bootstrap environment (if script exists)**
+   ```bash
+   npm run bootstrap
+   ```
+
+3. **Set up environment variables** (see above)
+
+## 🚀 Running Locally
+
+### Development Mode
+
+**Start both frontend and backend:**
 ```bash
-npm run dev:frontend     # Start frontend development server
-npm run build:frontend   # Build frontend for production
-npm run test:frontend    # Run frontend tests
-npm run lint:frontend    # Lint frontend code
+npm run dev
 ```
 
-### Backend Only
+This starts:
+- **Frontend**: http://localhost:3000 (or 3001 if 3000 is busy)
+- **Backend**: http://localhost:4000
+
+**Start individually:**
 ```bash
-npm run dev:backend      # Start backend development server
-npm run build:backend    # Build backend for production
-npm run test:backend     # Run backend tests
-npm run db:push          # Push database schema changes
-npm run db:migrate       # Run database migrations
-npm run db:seed          # Seed database with initial data
+# Frontend only
+npm run dev:frontend
+
+# Backend only  
+npm run dev:backend
 ```
 
-## 🐳 Docker Deployment
+### Google OAuth Setup
 
-### Local Development with Docker
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing one
+3. Enable Google+ API
+4. Go to Credentials → Create Credentials → OAuth 2.0 Client ID
+5. Add authorized origins:
+   - `http://localhost:3000`
+   - `http://localhost:3001`
+   - `https://yourdomain.com` (production)
+6. Add redirect URIs:
+   - `http://localhost:3000/api/auth/callback/google`
+   - `https://yourdomain.com/api/auth/callback/google` (production)
+
+### reCAPTCHA v3 Setup
+
+1. Go to [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin)
+2. Create a new site
+3. Choose reCAPTCHA v3
+4. Add domains:
+   - `localhost` (development)
+   - `yourdomain.com` (production)
+5. Copy the site key and secret key to your environment variables
+
+## 🧹 Clean Caches (Fix Prisma/TypeScript/Next.js Drift)
+
+If you encounter build issues or stale types:
+
 ```bash
-# Start all services
-docker-compose up
+# Clear all caches
+rm -rf node_modules/.prisma frontend/.next frontend/node_modules/.prisma .next
 
-# Start specific services
-docker-compose up frontend backend
-docker-compose up postgres
+# Regenerate Prisma client
+cd frontend && npx prisma generate
+
+# Type check
+npx tsc --noEmit
+
+# Build
+npm run build
 ```
 
-### Production Deployment
-```bash
-# Build and run production containers
-docker-compose -f docker-compose.prod.yml up -d
+## 🗄️ Database
+
+### Connection
+
+The application uses **Neon PostgreSQL** with SSL required:
+```env
+DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
 ```
 
-## 🌐 Deployment
+### Schema Management
 
-### Frontend (Vercel)
-1. Connect repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
+**Prisma-first approach:**
+```bash
+# After schema changes
+npx prisma migrate dev --name migration_name
+npx prisma generate
+```
 
-### Backend (Railway/Render)
-1. Connect repository to Railway/Render
-2. Set environment variables
-3. Configure build command: `npm run build:backend`
-4. Configure start command: `npm run start:backend`
+**Database-first approach:**
+```bash
+# Pull schema from existing database
+npx prisma db pull
+npx prisma generate
+```
+
+### Seeding
+
+**Run seed:**
+```bash
+cd frontend
+npx prisma db seed
+```
+
+**Common pitfalls:**
+- Use enum values (e.g., `Level.BEGINNER`) not strings for enum columns
+- For `String[]` fields, pass arrays directly
+- For `Json` fields, pass plain objects (no `JSON.stringify`)
+
+## 📚 API Documentation
+
+### Backend Swagger
+
+**URL**: http://localhost:4000/docs
+
+**Access**: Public (no authentication required for docs)
+
+### Frontend API Routes
+
+All API routes are in `frontend/app/api/` and follow Next.js App Router conventions.
+
+**Protected routes** require authentication via NextAuth.js session.
+
+## 🏗️ Build & Deploy
+
+### Local Build
+
+```bash
+# Build both frontend and backend
+npm run build
+
+# Build individually
+npm run build:frontend
+npm run build:backend
+```
+
+**Pre-build hooks:**
+- Environment variable validation
+- Prisma client generation
+- TypeScript type checking
+
+### Vercel Deployment
+
+1. **Connect repository** to Vercel
+2. **Set environment variables** in Vercel dashboard
+3. **Deploy** - Vercel automatically detects Next.js and builds
+4. **Environment mapping**: Ensure all `NEXT_PUBLIC_*` variables are set
+
+## 🧪 Navigation QA Checklist
+
+Test these pages to ensure navigation works correctly:
+
+- [ ] **Homepage** (`/`): Logo navigates to `/`, all menu items work
+- [ ] **Sign In** (`/auth/signin`): Logo and menu navigation works
+- [ ] **Sign Up** (`/auth/signup`): Logo and menu navigation works  
+- [ ] **Learning Hub** (`/learning`): All navigation elements functional
+- [ ] **Calculators** (`/calculators`): Menu navigation works
+- [ ] **About** (`/about`): Logo and menu navigation works
+- [ ] **Mobile menu**: Bottom navigation works on mobile devices
+
+**Verification**: In browser DevTools, ensure Link-based transitions don't fully reload the page (client-side navigation).
+
+## 🔒 Security Notes
 
 ### Environment Variables
 
-#### Frontend (.env)
-```env
-DATABASE_URL=postgresql://user:pass@host:port/db
-NEXTAUTH_URL=https://your-domain.vercel.app
-NEXTAUTH_SECRET=your-secure-random-string
-NEXT_PUBLIC_API_URL=https://your-backend-url.com
-```
+- **NEVER commit** `.env*` files to version control
+- Use `NEXT_PUBLIC_*` prefix **only** for client-safe variables
+- Server-only variables: `NEXTAUTH_SECRET`, `GOOGLE_CLIENT_SECRET`, `RECAPTCHA_SECRET_KEY`
+- Client-safe variables: `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`, `NEXT_PUBLIC_API_BASE_URL`
 
-#### Backend (.env)
-```env
-DATABASE_URL=postgresql://user:pass@host:port/db
-JWT_SECRET=your-secure-jwt-secret
-CORS_ORIGIN=https://your-frontend-domain.vercel.app
-PORT=4000
-```
+### Secret Rotation
 
-## 🧪 Testing
+If any secrets are exposed:
+1. **Immediately rotate** the exposed secret
+2. **Update environment variables** in all environments
+3. **Redeploy** applications
+4. **Review logs** for unauthorized access
 
-### Frontend Tests
-```bash
-npm run test:frontend        # Run all frontend tests
-npm run test:frontend:watch  # Run tests in watch mode
-```
+### Validation
 
-### Backend Tests
-```bash
-npm run test:backend         # Run all backend tests
-npm run test:backend:watch   # Run tests in watch mode
-```
+The application validates environment variables at startup and fails fast with actionable error messages.
 
-### Test Coverage
-- Frontend: Vitest with React Testing Library
-- Backend: Jest with Supertest
-- Target: 80%+ coverage for both
+## 🐛 Troubleshooting
 
-## 📖 API Documentation
+### Common Issues
 
-### Swagger UI
-- **Development**: http://localhost:4000/api/docs
-- **Production**: https://your-backend-url.com/api/docs
+**"Invalid client environment variables"**
+- Check that all required `NEXT_PUBLIC_*` variables are set
+- Ensure no server-only variables are used in client code
 
-### API Endpoints
-- **Authentication**: `/api/auth/*`
-- **User Management**: `/api/profile`, `/api/goals`
-- **Calculators**: `/api/calc-history`
-- **Learning Hub**: `/api/learning/*`
-- **Mutual Funds**: `/api/funds`
-- **Portfolio**: `/api/holdings`
+**Prisma type errors**
+- Run `npx prisma generate` after schema changes
+- Clear caches: `rm -rf node_modules/.prisma frontend/.next`
 
-## 🔧 Configuration
+**Navigation not working**
+- Ensure all links use Next.js `<Link>` components
+- Check for z-index conflicts in CSS
 
-### Database
-- **Development**: SQLite (file-based)
-- **Production**: PostgreSQL (cloud-hosted)
-- **Migrations**: Prisma migrations
-- **Seeding**: Initial data and learning content
+**Build failures**
+- Clear all caches and regenerate Prisma client
+- Check TypeScript errors: `npx tsc --noEmit`
 
-### Authentication
-- **Providers**: Google, GitHub, Email, Credentials
-- **Session**: JWT-based with refresh tokens
-- **Security**: bcrypt password hashing, rate limiting
+### Getting Help
 
-### Performance
-- **Frontend**: Next.js optimization, code splitting
-- **Backend**: Express middleware, connection pooling
-- **Database**: Prisma query optimization, indexing
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass
-6. Submit a pull request
+1. Check the troubleshooting section above
+2. Review environment variable setup
+3. Clear caches and regenerate Prisma client
+4. Check browser console for client-side errors
+5. Review server logs for backend issues
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-For support and questions:
-- Create an issue in the GitHub repository
-- Check the [documentation](docs/)
-- Review the [API documentation](backend/docs/)
+This project is proprietary software. All rights reserved.
 
 ---
 
-**Built with ❤️ for the Indian mutual fund community**
+**Disclaimer**: This platform provides investment recommendations for educational purposes only and does not constitute investment advice. Please consult with a financial advisor before making investment decisions.

@@ -1,0 +1,66 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# =============================================================================
+# PRE-PUSH SECURITY VERIFICATION
+# =============================================================================
+# 
+# This hook runs comprehensive security verification before pushing to ensure:
+# - No secrets are leaked in the repository
+# - Environment variables are used correctly
+# - Code quality and type safety
+# - Build process works correctly
+# 
+# If verification fails, the push is blocked with clear remediation steps.
+# =============================================================================
+
+echo "🔒 Running pre-push security verification..."
+
+# Check if we're in a git repository
+if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    echo "❌ Not in a git repository"
+    exit 1
+fi
+
+# Get the current branch
+CURRENT_BRANCH=$(git branch --show-current)
+
+echo "📋 Current branch: $CURRENT_BRANCH"
+echo "📋 Running comprehensive security checks..."
+
+# Run the security verification script
+if npm run verify:security; then
+    echo ""
+    echo "✅ Pre-push security verification passed!"
+    echo "🚀 Ready to push to $CURRENT_BRANCH"
+    exit 0
+else
+    echo ""
+    echo "❌ Pre-push security verification failed!"
+    echo ""
+    echo "🚨 Push blocked due to security issues"
+    echo ""
+    echo "📋 Common fixes:"
+    echo "1. Remove any hardcoded secrets from code"
+    echo "2. Fix environment variable usage (use @/lib/env.client or @/lib/env.server)"
+    echo "3. Resolve ESLint errors (run: npm run lint)"
+    echo "4. Fix TypeScript errors (run: npx tsc --noEmit)"
+    echo "5. Address build issues (run: npm run build)"
+    echo "6. Remove .env files from git tracking"
+    echo ""
+    echo "🔧 Quick fixes:"
+    echo "- Run: npm run verify:env (environment usage check)"
+    echo "- Run: npm run lint (linting issues)"
+    echo "- Run: npx tsc --noEmit (type errors)"
+    echo "- Run: npm run build (build issues)"
+    echo ""
+    echo "📚 For help, check:"
+    echo "- DEPLOY_ENV.md (environment setup)"
+    echo "- ENVIRONMENT_SECURITY_SUMMARY.md (security guidelines)"
+    echo "- .eslintrc.json (linting rules)"
+    echo ""
+    echo "💡 After fixing issues, run: npm run verify:security"
+    echo ""
+    exit 1
+fi
+

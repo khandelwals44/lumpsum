@@ -1,6 +1,140 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
+# Fast secret scanning for pre-commit
+# Uses compact regex list for common secrets
+
+echo "🔍 Running pre-commit secret scan..."
+
+# Get staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+    echo "✅ No files staged for commit"
+    exit 0
+fi
+
+# Compact regex patterns for common secrets
+SECRET_PATTERNS=(
+    # API Keys
+    "api[_-]?key.*=.*['\"]?[a-zA-Z0-9]{32,}['\"]?"
+    "AIza[0-9A-Za-z\\-_]{35}"
+    
+    # GitHub Tokens
+    "(ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36}"
+    
+    # AWS Keys
+    "AKIA[0-9A-Z]{16}"
+    "aws[_-]?secret[_-]?access[_-]?key.*=.*['\"]?[A-Za-z0-9/+=]{40}['\"]?"
+    
+    # Database URLs with passwords
+    "(postgresql?|mysql|mongodb)://[^:]+:[^@]+@[^/]+/[^?\s]+"
+    
+    # JWT Tokens
+    "eyJ[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*"
+    
+    # Private Keys
+    "-----BEGIN (RSA|DSA|EC|OPENSSH|PGP) PRIVATE KEY"
+    
+    # OAuth Secrets
+    "client[_-]?secret.*=.*['\"]?[a-zA-Z0-9]{16,}['\"]?"
+    
+    # reCAPTCHA
+    "6L[0-9A-Za-z-_]{35}"
+    
+    # Stripe Keys
+    "sk_live_[0-9a-zA-Z]{24}"
+    "pk_live_[0-9a-zA-Z]{24}"
+    
+    # Slack Tokens
+    "xox[bp]-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24}"
+    
+    # Discord Tokens
+    "[MN][a-zA-Z0-9]{23}\\.[\\w-]{6}\\.[\\w-]{27}"
+    
+    # Hardcoded passwords
+    "password.*=.*['\"]?[^'\"]{8,}['\"]?"
+    "passwd.*=.*['\"]?[^'\"]{8,}['\"]?"
+    "pwd.*=.*['\"]?[^'\"]{8,}['\"]?"
+)
+
+# Files to exclude from pre-commit scan
+EXCLUDE_PATTERNS=(
+    "node_modules/"
+    ".git/"
+    "dist/"
+    "build/"
+    ".next/"
+    "coverage/"
+    "*.min.js"
+    "*.bundle.js"
+    "package-lock.json"
+    "yarn.lock"
+    "pnpm-lock.yaml"
+    "*.log"
+    "*.tmp"
+    ".env.example"
+    "env.local.example"
+    "test-recaptcha.html"
+    "security/secret-scan-REPORT.txt"
+    ".trufflehog.yaml"
+)
+
+# Function to check if file should be excluded
+should_exclude() {
+    local file="$1"
+    for pattern in "${EXCLUDE_PATTERNS[@]}"; do
+        if [[ "$file" == *"$pattern"* ]]; then
+            return 0  # Should exclude
+        fi
+    done
+    return 1  # Should include
+}
+
+# Function to scan a file for secrets
+scan_file() {
+    local file="$1"
+    local found_secrets=false
+    
+    # Skip binary files
+    if file "$file" | grep -q "text"; then
+        for pattern in "${SECRET_PATTERNS[@]}"; do
+            if grep -E "$pattern" "$file" > /dev/null 2>&1; then
+                echo "🚨 Potential secret found in $file:"
+                grep -n -E "$pattern" "$file" | head -5
+                echo ""
+                found_secrets=true
+            fi
+        done
+    fi
+    
+    return $([ "$found_secrets" = true ] && echo 1 || echo 0)
+}
+
+# Scan all staged files
+SECRETS_FOUND=false
+
+for file in $STAGED_FILES; do
+    if ! should_exclude "$file"; then
+        if scan_file "$file"; then
+            SECRETS_FOUND=true
+        fi
+    fi
+done
+
+if [ "$SECRETS_FOUND" = true ]; then
+    echo "❌ Pre-commit secret scan failed!"
+    echo ""
+    echo "Remediation steps:"
+    echo "1. Remove secrets from staged files"
+    echo "2. Move secrets to environment variables"
+    echo "3. Rotate any exposed keys"
+    echo "4. Run: git add . && git commit"
+    echo ""
+    echo "For comprehensive scanning, run: ./scripts/scan-secrets.sh"
+    exit 1
+else
+    echo "✅ Pre-commit secret scan passed"
+fi
 
 

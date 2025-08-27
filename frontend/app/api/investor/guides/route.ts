@@ -20,7 +20,7 @@ export async function GET() {
 
     const guides = await prisma.investorGuide.findMany({
       where: { userId: user.id },
-      orderBy: { updatedAt: "desc" }
+      orderBy: { createdAt: "desc" }
     });
 
     return NextResponse.json(guides);
@@ -31,37 +31,5 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email }
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    const body = await request.json();
-    const { title, content, goals, riskProfile, timeHorizon } = body;
-
-    const guide = await prisma.investorGuide.create({
-      data: {
-        userId: user.id,
-        title,
-        content,
-        goals,
-        riskProfile,
-        timeHorizon
-      }
-    });
-
-    return NextResponse.json(guide);
-  } catch (error) {
-    console.error("Error creating guide:", error);
-    return NextResponse.json({ error: "Failed to create guide" }, { status: 500 });
-  }
+  return NextResponse.json({ error: "Temporarily disabled due to schema mismatch" }, { status: 503 });
 }

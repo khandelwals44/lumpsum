@@ -1,0 +1,266 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+jobs:
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comprehensive scanning
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Install TruffleHog
+        run: |
+          # Install trufflehog
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+          trufflehog --version
+      
+      - name: Create security directory
+        run: mkdir -p security
+      
+      - name: Run secret scan
+        id: scan
+        run: |
+          # Create trufflehog config
+          cat > .trufflehog.yaml << 'EOF'
+          detectors:
+            # API Keys
+            - name: "API Key - Generic"
+              regex: (?i)(api[_-]?key|apikey|api_key|api-key)\s*[:=]\s*['"]?[a-zA-Z0-9]{32,}['"]?
+              
+            - name: "Google API Key"
+              regex: AIza[0-9A-Za-z\\-_]{35}
+              
+            - name: "GitHub Token"
+              regex: (ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9_]{36}
+              
+            # AWS
+            - name: "AWS Access Key ID"
+              regex: AKIA[0-9A-Z]{16}
+              
+            - name: "AWS Secret Access Key"
+              regex: (?i)aws[_-]?secret[_-]?access[_-]?key\s*[:=]\s*['"]?[A-Za-z0-9/+=]{40}['"]?
+              
+            # Database URLs
+            - name: "Database URL with Password"
+              regex: (?i)(postgresql?|mysql|mongodb)://[^:]+:[^@]+@[^/]+/[^?\s]+
+              
+            # JWT Tokens
+            - name: "JWT Token"
+              regex: eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*
+              
+            # Private Keys
+            - name: "RSA Private Key"
+              regex: -----BEGIN RSA PRIVATE KEY-----
+              
+            - name: "DSA Private Key"
+              regex: -----BEGIN DSA PRIVATE KEY-----
+              
+            - name: "EC Private Key"
+              regex: -----BEGIN EC PRIVATE KEY-----
+              
+            - name: "OpenSSH Private Key"
+              regex: -----BEGIN OPENSSH PRIVATE KEY-----
+              
+            - name: "PGP Private Key"
+              regex: -----BEGIN PGP PRIVATE KEY BLOCK-----
+              
+            # OAuth
+            - name: "OAuth Client Secret"
+              regex: (?i)(client[_-]?secret|client_secret|client-secret)\s*[:=]\s*['"]?[a-zA-Z0-9]{16,}['"]?
+              
+            # reCAPTCHA
+            - name: "reCAPTCHA Secret Key"
+              regex: 6L[0-9A-Za-z-_]{35}
+              
+            # Stripe
+            - name: "Stripe Secret Key"
+              regex: sk_live_[0-9a-zA-Z]{24}
+              
+            - name: "Stripe Publishable Key"
+              regex: pk_live_[0-9a-zA-Z]{24}
+              
+            # Slack
+            - name: "Slack Bot Token"
+              regex: xoxb-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24}
+              
+            - name: "Slack User Token"
+              regex: xoxp-[0-9]{12}-[0-9]{12}-[a-zA-Z0-9]{24}
+              
+            # Discord
+            - name: "Discord Bot Token"
+              regex: [MN][a-zA-Z0-9]{23}\.[\w-]{6}\.[\w-]{27}
+              
+            # Firebase
+            - name: "Firebase API Key"
+              regex: AIza[0-9A-Za-z\\-_]{35}
+              
+            # Google Cloud
+            - name: "Google Cloud API Key"
+              regex: AIza[0-9A-Za-z\\-_]{35}
+              
+            # Passwords in code
+            - name: "Hardcoded Password"
+              regex: (?i)(password|passwd|pwd)\s*[:=]\s*['"]?[^'"]{8,}['"]?
+              
+            # Environment variables with secrets
+            - name: "Secret in Environment Variable"
+              regex: (?i)(secret|key|token|password)\s*[:=]\s*['"]?[a-zA-Z0-9]{16,}['"]?
+
+          exclude:
+            - "node_modules/"
+            - ".git/"
+            - "dist/"
+            - "build/"
+            - ".next/"
+            - "coverage/"
+            - "*.min.js"
+            - "*.bundle.js"
+            - "package-lock.json"
+            - "yarn.lock"
+            - "pnpm-lock.yaml"
+            - "*.log"
+            - "*.tmp"
+            - ".env.example"
+            - "env.local.example"
+            - "test-recaptcha.html"
+            - "security/secret-scan-REPORT.txt"
+            - ".trufflehog.yaml"
+
+          only-verified: false
+          fail: false
+          json: true
+          EOF
+          
+          # Run scan and capture output
+          trufflehog --config .trufflehog.yaml . > security/secret-scan-REPORT.txt 2>&1 || true
+          
+          # Check if any secrets were found
+          if [ -s security/secret-scan-REPORT.txt ]; then
+            echo "::error::🚨 Secrets found in repository!"
+            echo "::error::Check security/secret-scan-REPORT.txt for details"
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No secrets found"
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: secret-scan-results
+          path: security/
+          retention-days: 30
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.scan.outputs.found == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'security/secret-scan-REPORT.txt';
+            
+            let comment = '## 🚨 Security Alert: Secrets Found\n\n';
+            comment += 'This PR contains potential secrets that should be addressed:\n\n';
+            
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+              comment += '```\n' + report + '\n```\n\n';
+            }
+            
+            comment += '### 🔧 Remediation Steps:\n\n';
+            comment += '1. **Remove secrets from code** - Move to environment variables\n';
+            comment += '2. **Rotate exposed keys** - Generate new API keys/tokens\n';
+            comment += '3. **Update .env files** - Add secrets to environment variables\n';
+            comment += '4. **Check git history** - Use `git filter-repo` to remove from history\n';
+            comment += '5. **Re-run scan** - Verify secrets are removed\n\n';
+            comment += '### 📋 Next Steps:\n\n';
+            comment += '- [ ] Remove secrets from code\n';
+            comment += '- [ ] Rotate any exposed keys\n';
+            comment += '- [ ] Update environment variables\n';
+            comment += '- [ ] Re-run security scan\n';
+            comment += '- [ ] Request review\n\n';
+            comment += 'For detailed instructions, see: [SECURITY.md](SECURITY.md)';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Fail on secrets found
+        if: steps.scan.outputs.found == 'true'
+        run: |
+          echo "::error::🚨 Security scan failed - secrets found in repository"
+          echo "::error::Please review the scan results and remove any secrets"
+          echo "::error::See security/secret-scan-REPORT.txt for details"
+          exit 1
+
+  dependency-scan:
+    name: Dependency Vulnerability Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+      
+      - name: Run npm outdated
+        run: npm outdated || true
+
+  code-scan:
+    name: Code Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint security rules
+        run: npm run lint
+      
+      - name: Run TypeScript type check
+        run: npm run typecheck
+

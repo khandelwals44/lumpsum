@@ -2,10 +2,66 @@
   "root": true,
   "extends": ["next/core-web-vitals", "plugin:jsx-a11y/recommended"],
   "plugins": ["jsx-a11y"],
-  "overrides": [],
+  "overrides": [
+    {
+      "files": ["app/**/*.tsx", "app/**/*.ts", "components/**/*.tsx", "components/**/*.ts"],
+      "rules": {
+        "no-restricted-globals": [
+          "error",
+          {
+            "name": "process",
+            "message": "Use @/lib/env.client for client-side environment variables"
+          }
+        ],
+        "no-restricted-syntax": [
+          "error",
+          {
+            "selector": "MemberExpression[object.name='process'][property.name='env']",
+            "message": "Use @/lib/env.client for client-side environment variables"
+          }
+        ],
+        "no-console": [
+          "error",
+          { 
+            "allow": ["warn", "error"]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["app/api/**/*.ts", "app/api/**/*.js", "lib/env.server.ts", "lib/prisma.ts", "lib/auth.ts"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/lib/env.client"],
+                "message": "Server code should use @/lib/env.server"
+              }
+            ]
+          }
+        ],
+        "no-restricted-globals": "off",
+        "no-restricted-syntax": "off",
+        "no-console": "off"
+      }
+    }
+  ],
   "rules": {
     "@next/next/no-img-element": "off",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["@/lib/env.server"],
+            "message": "Client components cannot import server-only environment variables"
+          }
+        ]
+      }
+    ]
   },
   "ignorePatterns": ["**/*.json", "**/*.md", "styles/**/*.css", "package-lock.json"]
 }

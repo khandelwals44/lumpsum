@@ -17,11 +17,16 @@ const EnvSchema = z.object({
   NEXT_PUBLIC_API_BASE_URL: z.string().optional()
 });
 
-const parsed = EnvSchema.safeParse(process.env);
-if (!parsed.success) {
-  // eslint-disable-next-line no-console
-  console.error("Invalid environment variables:", parsed.error.flatten().fieldErrors);
-  throw new Error("Environment validation failed");
-}
+// Runtime validation function
+export const getEnv = () => {
+  const parsed = EnvSchema.safeParse(process.env);
+  if (!parsed.success) {
+    // eslint-disable-next-line no-console
+    console.error("Invalid environment variables:", parsed.error.flatten().fieldErrors);
+    throw new Error("Environment validation failed");
+  }
+  return parsed.data;
+};
 
-export const Env = parsed.data;
+// Export for backward compatibility (but prefer getEnv() for new code)
+export const Env = getEnv();

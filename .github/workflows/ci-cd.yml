@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, release/V_2.0, feature/vsCode-complete ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, release/V_2.0, develop ]
 
 env:
   NEXTAUTH_URL: "https://lumpsum.vercel.app"

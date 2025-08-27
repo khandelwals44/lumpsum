@@ -23,6 +23,11 @@ const ServerEnvSchema = z.object({
   
   // Node environment
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  
+  // Vercel system environment variables
+  VERCEL_URL: z.string().optional(),
+  VERCEL_BRANCH_URL: z.string().optional(),
+  VERCEL_PROJECT_PRODUCTION_URL: z.string().optional(),
 });
 
 type ServerEnv = z.infer<typeof ServerEnvSchema>;
@@ -69,6 +74,35 @@ PRODUCTION:
 
   cachedEnv = parsed.data;
   return cachedEnv;
+}
+
+/**
+ * Get the NextAuth URL, deriving it from Vercel environment variables if not explicitly set.
+ * This function is Vercel-aware and handles preview deployments automatically.
+ */
+export function getNextAuthUrl(): string {
+  const env = getServerEnv();
+  
+  // If NEXTAUTH_URL is explicitly set, use it
+  if (env.NEXTAUTH_URL) {
+    return env.NEXTAUTH_URL;
+  }
+  
+  // For Vercel deployments, derive from system environment variables
+  if (env.VERCEL_BRANCH_URL) {
+    return `https://${env.VERCEL_BRANCH_URL}`;
+  }
+  
+  if (env.VERCEL_URL) {
+    return `https://${env.VERCEL_URL}`;
+  }
+  
+  if (env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  }
+  
+  // Default for local development
+  return "http://localhost:3000";
 }
 
 /**

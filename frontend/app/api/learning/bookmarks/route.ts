@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { chapterId, sectionId, note } = body;
+    const { chapterId } = body;
 
     if (!chapterId) {
       return NextResponse.json({ error: "Missing chapterId" }, { status: 400 });
@@ -64,9 +64,7 @@ export async function POST(request: NextRequest) {
     const bookmark = await prisma.userBookmark.create({
       data: {
         userId: user.id,
-        chapterId,
-        sectionId,
-        note
+        chapterId
       }
     });
 

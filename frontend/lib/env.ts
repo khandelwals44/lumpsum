@@ -12,6 +12,8 @@ const EnvSchema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GITHUB_ID: z.string().optional(),
   GITHUB_SECRET: z.string().optional(),
+  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string().optional(),
+  RECAPTCHA_SECRET_KEY: z.string().optional(),
   NEXT_PUBLIC_API_BASE_URL: z.string().optional()
 });
 

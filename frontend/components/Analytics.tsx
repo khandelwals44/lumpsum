@@ -1,10 +1,11 @@
 "use client";
 
 import Script from "next/script";
+import { getAnalyticsConfig } from '@/lib/env.client';
 
 /** Placeholder analytics slot. Set NEXT_PUBLIC_GA_ID to enable GA4. */
 export function AnalyticsSlot() {
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const gaId = getAnalyticsConfig().gaId;
   if (!gaId) return null;
   return (
     <>

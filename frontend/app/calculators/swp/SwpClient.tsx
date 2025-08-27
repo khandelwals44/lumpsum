@@ -12,7 +12,8 @@ import { parseParamNumber, useUrlState } from "@/lib/url";
 import { formatINR } from "@/lib/format";
 import { FadeIn } from "@/components/FadeIn";
 import { saveLocal, loadLocal } from "@/lib/persist";
-import { Api, getAuthToken } from "@/lib/api";
+import { Api } from "@/lib/api";
+import { getApiConfig } from "@/lib/env.client";
 import { Calculation, SavedCalculation } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 export default function SwpClient() {
@@ -93,7 +94,7 @@ export default function SwpClient() {
               };
               const savedCalculations = loadLocal<SavedCalculation[]>(STORAGE_KEY, []);
               saveLocal(STORAGE_KEY, [...savedCalculations, { ...newCalculation, id: uuidv4() }]);
-              if (getAuthToken() && process.env.NEXT_PUBLIC_API_BASE_URL) {
+              if (getApiConfig().baseUrl) {
                 Api.saveCalculation(
                   newCalculation.type,
                   newCalculation.inputs,

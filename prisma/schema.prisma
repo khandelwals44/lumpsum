@@ -5,6 +5,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
@@ -271,15 +277,13 @@ model UserQuizAnswer {
   id        String   @id @default(cuid())
   userId    String
   quizId    String
-  answer    Int
+  selectedAnswer Int
   isCorrect Boolean
   answeredAt DateTime @default(now())
   
   // Relations
   user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   quiz ChapterQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, quizId])
 }
 
 model UserBadge {
@@ -295,16 +299,13 @@ model UserBadge {
 }
 
 model InvestorGuide {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  content   String   // JSON structured content
-  goals     String   // JSON array of user goals
-  riskProfile String
-  timeHorizon String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  description String
+  goals       String   // JSON array as string
+  recommendations String // JSON object as string
+  createdAt   DateTime @default(now())
   
-  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

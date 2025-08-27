@@ -15,8 +15,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "echo 'Skipping husky install in production'",
-    "postinstall": "prisma generate",
-    "db:generate": "prisma generate",
+    "postinstall": "prisma generate --schema ./prisma/schema.prisma",
+    "prisma:generate": "prisma generate --schema ./prisma/schema.prisma",
+    "prisma:pull": "prisma db pull --schema ./prisma/schema.prisma",
+    "prisma:clean": "rm -rf node_modules/.prisma .next",
+    "prebuild": "npm run prisma:generate",
+    "db:generate": "prisma generate --schema ./prisma/schema.prisma",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:seed:learning": "tsx ../backend/prisma/seed-learning.ts",
@@ -101,7 +105,10 @@
       "prettier --write"
     ],
     "*.{json,css,md}": [
-      "prettier --write"
-    ]
+          "prettier --write"
+  ],
+  "overrides": {
+    "jspdf": "^3.0.2"
   }
+}
 }

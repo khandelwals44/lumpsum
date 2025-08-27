@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
-import { getRecaptchaConfig } from '@/lib/env.client';
+import { getRecaptchaSiteKey } from '@/src/env.client';
 
 interface ReCaptchaProps {
   onVerify: (token: string) => void;
@@ -31,11 +31,11 @@ export default function ReCaptcha({
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
 
-  const siteKey = getRecaptchaConfig().siteKey;
+  const siteKey = getRecaptchaSiteKey();
 
   const executeRecaptcha = useCallback(async () => {
-    if (!siteKey || siteKey === '6Lxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') {
-      setError("reCAPTCHA not configured - please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env.local");
+    if (!siteKey) {
+      setError("reCAPTCHA not configured - captcha-dependent actions disabled");
       onError("reCAPTCHA not configured");
       return;
     }
@@ -69,8 +69,8 @@ export default function ReCaptcha({
   }, [siteKey, action, onVerify, onError]);
 
   useEffect(() => {
-    if (!siteKey || siteKey === '6Lxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx') {
-      setError("reCAPTCHA not configured - please set NEXT_PUBLIC_RECAPTCHA_SITE_KEY in .env.local");
+    if (!siteKey) {
+      setError("reCAPTCHA not configured - captcha-dependent actions disabled");
       onError("reCAPTCHA not configured");
       return;
     }

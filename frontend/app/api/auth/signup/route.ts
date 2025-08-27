@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signUpSchema } from "@/lib/validations/auth";
 import { rateLimit } from "@/lib/rate-limit";
-import { serverEnv } from "@/lib/env.server";
 
 // Rate limiting: 5 signup attempts per IP per hour
 const limiter = rateLimit({
@@ -39,14 +38,15 @@ export async function POST(req: Request) {
     const { fullName, email, password, recaptchaToken } = validationResult.data;
 
     // Verify reCAPTCHA if configured
-    if (serverEnv.RECAPTCHA_SECRET_KEY && recaptchaToken) {
+    const recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
+    if (recaptchaSecretKey && recaptchaToken) {
       const recaptchaResponse = await fetch(
         "https://www.google.com/recaptcha/api/siteverify",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
-            secret: serverEnv.RECAPTCHA_SECRET_KEY,
+            secret: recaptchaSecretKey,
             response: recaptchaToken,
           }),
         }

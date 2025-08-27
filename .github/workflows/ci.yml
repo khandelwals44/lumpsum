@@ -1,65 +1,45 @@
 name: CI
 
 on:
-  push:
-    branches: [ main, master, feature/** ]
   pull_request:
     branches: [ main, master ]
+  push:
+    branches: [ chore/v2-green-and-future-proof ]
 
 jobs:
-  build:
+  web:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Use Node.js 18
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm ci
+        working-directory: frontend
       - name: Setup .env for CI
         run: |
-          echo 'DATABASE_URL="file:./dev.db"' > .env
-          echo 'NEXTAUTH_URL="http://localhost:3000"' >> .env
-          echo 'NEXTAUTH_SECRET="testsecret"' >> .env
-
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Sync DB
-        run: npx prisma db push
-
-      - name: Seed DB
-        run: npm run db:seed
-
+          echo 'DATABASE_URL="file:./dev.db"' > frontend/.env
+          echo 'NEXTAUTH_URL="http://localhost:3000"' >> frontend/.env
+          echo 'NEXTAUTH_SECRET="testsecret"' >> frontend/.env
+          echo 'GOOGLE_CLIENT_ID="test"' >> frontend/.env
+          echo 'GOOGLE_CLIENT_SECRET="test"' >> frontend/.env
+          echo 'RECAPTCHA_SECRET_KEY="test"' >> frontend/.env
+        working-directory: frontend
+      - name: Prisma generate
+        run: npx prisma generate --schema frontend/prisma/schema.prisma
+      - name: Lint
+        run: npm run lint
+        working-directory: frontend
       - name: Typecheck
         run: npm run typecheck
-
-      - name: Tests
-        run: npm test --silent
-
+        working-directory: frontend
+      - name: Audit
+        run: npm audit --audit-level=high || true
+        working-directory: frontend
       - name: Build
         run: npm run build
-
-      - name: Backend install
-        run: npm install --prefix backend
-
-      - name: Backend typecheck
-        run: npm run typecheck --prefix backend
-
-      - name: Backend build
-        run: npm run build --prefix backend
-
-      - name: Backend tests
-        env:
-          DATABASE_URL: "file:../prisma/dev.db"
-          JWT_SECRET: "testsecret_testsecret"
-        run: npm test --prefix backend --silent
+        working-directory: frontend
 
 

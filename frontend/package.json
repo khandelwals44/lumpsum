@@ -23,7 +23,8 @@
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:seed:learning": "tsx ../backend/prisma/seed-learning.ts",
-    "db:migrate": "prisma migrate deploy"
+    "db:migrate": "prisma migrate deploy",
+    "prisma:clean": "rm -rf node_modules/.prisma .next"
   },
   "engines": {
     "node": ">=18.18.0"

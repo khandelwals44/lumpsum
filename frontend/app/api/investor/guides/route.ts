@@ -46,14 +46,13 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, goals, riskProfile, timeHorizon } = body;
+    const { title, goals, timeHorizon } = body;
 
     const guide = await prisma.investorGuide.create({
       data: {
         userId: user.id,
         title,
         goals,
-        riskProfile,
         timeHorizon
       }
     });

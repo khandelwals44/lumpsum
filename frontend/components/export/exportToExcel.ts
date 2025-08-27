@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import ExcelExport from "excel-export";
 
 interface ExportData {
   inputs: Record<string, any>;
@@ -11,29 +11,47 @@ export async function exportToExcel(
   title: string,
   calculatorType: string
 ): Promise<void> {
-  // Create workbook
-  const workbook = XLSX.utils.book_new();
-
+  // Prepare data for excel-export
+  const conf: any = {};
+  
   // Input parameters sheet
   const inputData = Object.entries(data.inputs).map(([key, value]) => ({
     Parameter: key,
     Value: value
   }));
-  const inputSheet = XLSX.utils.json_to_sheet(inputData);
-  XLSX.utils.book_append_sheet(workbook, inputSheet, "Input Parameters");
+  
+  conf.inputs = {
+    name: "Input Parameters",
+    cols: [
+      { caption: 'Parameter', type: 'string' },
+      { caption: 'Value', type: 'string' }
+    ],
+    rows: inputData.map(item => [item.Parameter, item.Value])
+  };
 
   // Results sheet
   const resultData = Object.entries(data.results).map(([key, value]) => ({
     Result: key,
     Value: typeof value === 'number' ? value.toLocaleString() : value
   }));
-  const resultSheet = XLSX.utils.json_to_sheet(resultData);
-  XLSX.utils.book_append_sheet(workbook, resultSheet, "Results");
+  
+  conf.results = {
+    name: "Results",
+    cols: [
+      { caption: 'Result', type: 'string' },
+      { caption: 'Value', type: 'string' }
+    ],
+    rows: resultData.map(item => [item.Result, item.Value])
+  };
 
   // Chart data sheet (if available)
   if (data.chartData && data.chartData.length > 0) {
-    const chartSheet = XLSX.utils.json_to_sheet(data.chartData);
-    XLSX.utils.book_append_sheet(workbook, chartSheet, "Chart Data");
+    const chartKeys = Object.keys(data.chartData[0] || {});
+    conf.chartData = {
+      name: "Chart Data",
+      cols: chartKeys.map(key => ({ caption: key, type: 'string' })),
+      rows: data.chartData.map(item => chartKeys.map(key => item[key]))
+    };
   }
 
   // Summary sheet
@@ -43,11 +61,29 @@ export async function exportToExcel(
     { Field: "Generated Time", Value: new Date().toLocaleTimeString() },
     { Field: "Website", Value: "lumpsum.in" }
   ];
-  const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-  XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary");
+  
+  conf.summary = {
+    name: "Summary",
+    cols: [
+      { caption: 'Field', type: 'string' },
+      { caption: 'Value', type: 'string' }
+    ],
+    rows: summaryData.map(item => [item.Field, item.Value])
+  };
 
-  // Save the file
+  // Generate and download the file
+  const result = ExcelExport(conf);
   const fileName = `${calculatorType}_${new Date().toISOString().split('T')[0]}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
+  
+  // Create blob and download
+  const blob = new Blob([result as BlobPart], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 }
 

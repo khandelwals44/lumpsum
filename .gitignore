@@ -67,8 +67,18 @@ web_modules/
 
 # dotenv environment variable files
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+*.env
+credentials.*
+secrets.*
+*.key
+*.pem
+*.p12
+*.pfx
 
 # SQLite databases
 *.db

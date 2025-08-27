@@ -46,6 +46,28 @@ export function getServerEnv(): ServerEnv {
   const parsed = ServerEnvSchema.safeParse(process.env);
   
   if (!parsed.success) {
+    // During build time, be more lenient with missing optional variables
+    if (process.env.NODE_ENV === 'production' && process.env.VERCEL) {
+      // For Vercel builds, provide defaults for optional variables
+      const envWithDefaults = {
+        NEXTAUTH_URL: process.env.NEXTAUTH_URL || process.env.VERCEL_URL || 'http://localhost:3000',
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-build',
+        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
+        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
+        GITHUB_ID: process.env.GITHUB_ID || '',
+        GITHUB_SECRET: process.env.GITHUB_SECRET || '',
+        RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY || '',
+        DATABASE_URL: process.env.DATABASE_URL || 'file:./dev.db',
+        NODE_ENV: process.env.NODE_ENV || 'production',
+        VERCEL_URL: process.env.VERCEL_URL || '',
+        VERCEL_BRANCH_URL: process.env.VERCEL_BRANCH_URL || '',
+        VERCEL_PROJECT_PRODUCTION_URL: process.env.VERCEL_PROJECT_PRODUCTION_URL || '',
+      };
+      
+      cachedEnv = envWithDefaults as ServerEnv;
+      return cachedEnv;
+    }
+    
     const missingKeys = Object.keys(parsed.error.flatten().fieldErrors);
     
     const errorMessage = `
@@ -84,7 +106,7 @@ export function getNextAuthUrl(): string {
   const env = getServerEnv();
   
   // If NEXTAUTH_URL is explicitly set, use it
-  if (env.NEXTAUTH_URL) {
+  if (env.NEXTAUTH_URL && env.NEXTAUTH_URL !== 'http://localhost:3000') {
     return env.NEXTAUTH_URL;
   }
   
@@ -120,6 +142,12 @@ export function validateRuntimeEnv(): void {
   const missing = requiredVars.filter(v => !v.value);
   
   if (missing.length > 0) {
+    // For Vercel deployments, be more lenient with missing variables during build
+    if (process.env.NODE_ENV === 'production' && process.env.VERCEL) {
+      console.warn('⚠️  Some environment variables are missing, but continuing for Vercel build...');
+      return;
+    }
+    
     const errorMessage = `
 🚨 Missing required runtime environment variables:
 

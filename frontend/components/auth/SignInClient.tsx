@@ -20,7 +20,7 @@ export default function SignInClient() {
   const target = sp?.get("callbackUrl") || "/dashboard";
   const callbackUrl = useMemo(() => {
     const base =
-      typeof window !== "undefined" ? window.location.origin : process.env.NEXTAUTH_URL || "";
+      typeof window !== "undefined" ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || "";
     try {
       // eslint-disable-next-line no-new
       new URL(target);

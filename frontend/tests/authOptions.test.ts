@@ -1,4 +1,24 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+// Mock server-only dependencies
+vi.mock('@/src/env.server', () => ({
+  getRequiredEnvVars: vi.fn(() => ({
+    DATABASE_URL: 'test-db-url',
+    NEXTAUTH_SECRET: 'test-secret',
+    GOOGLE_CLIENT_ID: 'test-client-id',
+    GOOGLE_CLIENT_SECRET: 'test-client-secret',
+    RECAPTCHA_SECRET_KEY: 'test-recaptcha-key',
+  }))
+}));
+
+// Mock Prisma
+vi.mock('@/lib/prisma', () => ({
+  prisma: {
+    user: {
+      findUnique: vi.fn()
+    }
+  }
+}));
 
 // Import the authOptions to test its callbacks behavior
 import { authOptions } from "@/lib/auth";

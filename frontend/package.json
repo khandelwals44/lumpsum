@@ -5,9 +5,8 @@
   "description": "Frontend Next.js application for lumpsum.in - High-end Goal-based Mutual Fund Recommendation Platform",
   "scripts": {
     "predev": "node ../scripts/check-env.js",
-    "prebuild": "node ../scripts/check-env.js",
     "dev": "next dev",
-    "build": "node ../scripts/check-env-usage.mjs && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -16,16 +15,16 @@
     "test:watch": "vitest",
     "prepare": "echo 'Skipping husky install in production'",
     "postinstall": "prisma generate --schema ./prisma/schema.prisma",
+    "check:env": "node ../scripts/check-env-usage.mjs",
     "prisma:generate": "prisma generate --schema ./prisma/schema.prisma",
     "prisma:pull": "prisma db pull --schema ./prisma/schema.prisma",
     "prisma:clean": "rm -rf node_modules/.prisma .next",
-    "prebuild": "npm run prisma:generate",
+    "prebuild": "npm run check:env && npm run prisma:generate",
     "db:generate": "prisma generate --schema ./prisma/schema.prisma",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:seed:learning": "tsx ../backend/prisma/seed-learning.ts",
-    "db:migrate": "prisma migrate deploy",
-    "prisma:clean": "rm -rf node_modules/.prisma .next"
+    "db:migrate": "prisma migrate deploy"
   },
   "engines": {
     "node": ">=18.18.0"

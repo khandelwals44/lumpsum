@@ -40,7 +40,7 @@ const serverEnvSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   
   // API Configuration
-  API_BASE_URL: z.string().url('API_BASE_URL must be a valid URL').optional(),
+  API_BASE_URL: z.string().optional(),
 });
 
 // Parse and validate environment variables

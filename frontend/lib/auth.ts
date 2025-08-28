@@ -101,5 +101,14 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error"
+  },
+  // Add error handling
+  events: {
+    async signIn({ user, account, profile, isNewUser }) {
+      console.log('✅ User signed in:', { email: user.email, provider: account?.provider });
+    },
+    async signOut({ session, token }) {
+      console.log('👋 User signed out');
+    }
   }
 };

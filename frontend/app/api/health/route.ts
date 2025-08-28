@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
+  const startTime = Date.now();
+  
   try {
     // Test database connection
     let dbConnected = false;
     let chaptersCount = 0;
+    let dbError = null;
     
     try {
       const dbTest = await prisma.$queryRaw`SELECT 1 as test`;
@@ -13,8 +16,9 @@ export async function GET(request: NextRequest) {
       
       // Test learning chapters count
       chaptersCount = await prisma.learningChapter.count();
-    } catch (dbError) {
-      console.warn("Database connection failed during health check:", dbError);
+    } catch (error) {
+      dbError = error instanceof Error ? error.message : 'Unknown database error';
+      console.warn("Database connection failed during health check:", error);
       dbConnected = false;
     }
     
@@ -29,23 +33,35 @@ export async function GET(request: NextRequest) {
       nodeEnv: process.env.NODE_ENV,
       vercelUrl: process.env.VERCEL_URL,
       vercelBranchUrl: process.env.VERCEL_BRANCH_URL,
+      nextAuthUrl: process.env.NEXTAUTH_URL,
     };
+
+    const responseTime = Date.now() - startTime;
 
     return NextResponse.json({
       status: dbConnected ? "healthy" : "degraded",
       timestamp: new Date().toISOString(),
+      responseTime: `${responseTime}ms`,
       database: {
         connected: dbConnected,
-        chaptersCount
+        chaptersCount,
+        error: dbError
       },
-      environment: envCheck
+      environment: envCheck,
+      deployment: {
+        platform: "vercel",
+        region: process.env.VERCEL_REGION || "unknown",
+        functionRegion: process.env.VERCEL_FUNCTION_REGION || "unknown"
+      }
     });
   } catch (error) {
     console.error("Health check failed:", error);
     return NextResponse.json({
       status: "unhealthy",
       timestamp: new Date().toISOString(),
-      error: error instanceof Error ? error.message : "Unknown error"
+      responseTime: `${Date.now() - startTime}ms`,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: process.env.NODE_ENV === "development" ? error instanceof Error ? error.stack : undefined : undefined
     }, { status: 500 });
   }
 }

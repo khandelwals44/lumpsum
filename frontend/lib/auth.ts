@@ -19,6 +19,8 @@ function getProviders() {
   
   try {
     const envVars = getRequiredEnvVars();
+    
+    // Only add Google provider if credentials are available
     if (envVars.GOOGLE_CLIENT_ID && envVars.GOOGLE_CLIENT_SECRET) {
       providers.push(
         GoogleProvider({
@@ -33,14 +35,15 @@ function getProviders() {
           }
         })
       );
-      console.log('Google OAuth provider configured successfully');
+      console.log('✅ Google OAuth provider configured successfully');
     } else {
-      console.warn('Google OAuth not configured: Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
+      console.warn('⚠️ Google OAuth not configured: Missing credentials');
     }
   } catch (error) {
-    console.warn('Google OAuth not configured:', error);
+    console.error('❌ Error configuring Google OAuth:', error);
   }
 
+  // Always add credentials provider as fallback
   providers.push(
     CredentialsProvider({
       name: "credentials",
@@ -51,18 +54,34 @@ function getProviders() {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await prisma.user.findUnique({ where: { email: credentials.email } });
-        if (!user || !user.password) return null;
+        try {
+          const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+          if (!user || !user.password) return null;
 
-        const valid = await bcrypt.compare(credentials.password, user.password);
-        if (!valid) return null;
+          const valid = await bcrypt.compare(credentials.password, user.password);
+          if (!valid) return null;
 
-        return { id: user.id, email: user.email, name: user.name, role: user.role } as any;
+          return { id: user.id, email: user.email, name: user.name, role: user.role } as any;
+        } catch (error) {
+          console.error('❌ Credentials authorization error:', error);
+          return null;
+        }
       }
     })
   );
 
   return providers;
+}
+
+// Get the base URL for NextAuth
+function getNextAuthBaseUrl() {
+  // In Vercel, use the deployment URL
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  
+  // Fallback to NEXTAUTH_URL or localhost
+  return process.env.NEXTAUTH_URL || 'http://localhost:3000';
 }
 
 export const authOptions: NextAuthOptions = {
@@ -90,6 +109,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
+      // Always redirect to dashboard after successful sign-in
       const target = "/dashboard";
       const isRelative = url.startsWith("/");
       const isSameHost = url.startsWith(baseUrl);

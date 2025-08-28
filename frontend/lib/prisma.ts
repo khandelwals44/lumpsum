@@ -13,16 +13,11 @@ export const prisma =
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-// Add connection error handling
-prisma.$connect()
-  .then(() => {
-    console.log('✅ Database connected successfully');
-  })
-  .catch((error) => {
-    console.error('❌ Database connection failed:', error);
-  });
-
 // Graceful shutdown
 process.on('beforeExit', async () => {
-  await prisma.$disconnect();
+  try {
+    await prisma.$disconnect();
+  } catch (error) {
+    console.error('Error disconnecting from database:', error);
+  }
 });

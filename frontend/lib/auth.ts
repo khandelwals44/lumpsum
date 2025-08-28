@@ -6,41 +6,33 @@
  */
 import { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { getRequiredEnvVars } from "@/src/env.server";
 
 // Function to get providers at runtime (not import time)
 function getProviders() {
   const providers: NextAuthOptions["providers"] = [];
   
-  try {
-    const envVars = getRequiredEnvVars();
-    
-    // Only add Google provider if credentials are available
-    if (envVars.GOOGLE_CLIENT_ID && envVars.GOOGLE_CLIENT_SECRET) {
-      providers.push(
-        GoogleProvider({
-          clientId: envVars.GOOGLE_CLIENT_ID,
-          clientSecret: envVars.GOOGLE_CLIENT_SECRET,
-          authorization: {
-            params: {
-              prompt: "consent",
-              access_type: "offline",
-              response_type: "code"
-            }
+  // Add Google provider if credentials are available
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    providers.push(
+      GoogleProvider({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        authorization: {
+          params: {
+            prompt: "consent",
+            access_type: "offline",
+            response_type: "code"
           }
-        })
-      );
-      console.log('✅ Google OAuth provider configured successfully');
-    } else {
-      console.warn('⚠️ Google OAuth not configured: Missing credentials');
-    }
-  } catch (error) {
-    console.error('❌ Error configuring Google OAuth:', error);
+        }
+      })
+    );
+    console.log('✅ Google OAuth provider configured successfully');
+  } else {
+    console.warn('⚠️ Google OAuth not configured: Missing credentials');
   }
 
   // Always add credentials provider as fallback
@@ -73,21 +65,10 @@ function getProviders() {
   return providers;
 }
 
-// Get the base URL for NextAuth
-function getNextAuthBaseUrl() {
-  // In Vercel, use the deployment URL
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-  
-  // Fallback to NEXTAUTH_URL or localhost
-  return process.env.NEXTAUTH_URL || 'http://localhost:3000';
-}
-
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: getProviders(),
-  secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development',
+  secret: process.env.NEXTAUTH_SECRET,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   debug: process.env.NODE_ENV === 'development',
   callbacks: {
@@ -121,14 +102,5 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error"
-  },
-  // Add error handling
-  events: {
-    async signIn({ user, account, profile, isNewUser }) {
-      console.log('✅ User signed in:', { email: user.email, provider: account?.provider });
-    },
-    async signOut({ session, token }) {
-      console.log('👋 User signed out');
-    }
   }
 };

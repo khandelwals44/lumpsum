@@ -24,7 +24,8 @@
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
     "db:seed:learning": "tsx ../backend/prisma/seed-learning.ts",
-    "db:migrate": "prisma migrate deploy"
+    "db:migrate": "prisma migrate deploy",
+    "db:setup": "node scripts/setup-db.js"
   },
   "engines": {
     "node": ">=18.18.0"

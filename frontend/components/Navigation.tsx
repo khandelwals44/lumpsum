@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Target, BarChart3, User, Calculator, BookOpen } from "lucide-react";
+import { Home, Target, BarChart3, User, Calculator, BookOpen, MessageSquare } from "lucide-react";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Learning Hub", href: "/learning", icon: BookOpen },
   { name: "Calculators", href: "/calculators", icon: Calculator },
-  { name: "About", href: "/about", icon: Target }
+  { name: "About", href: "/about", icon: Target },
+  { name: "Feedback", href: "/feedback", icon: MessageSquare }
 ];
 
 export function DesktopNavigation() {

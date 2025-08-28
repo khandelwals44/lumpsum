@@ -9,10 +9,10 @@ import { RegisterSW } from "@/components/RegisterSW";
 import { AuthButtons } from "@/components/AuthButtons";
 import { ClientSession } from "@/components/ClientSession";
 import { Button } from "@/components/ui/button";
-import { Home, Target, BarChart3, User, Calculator, BookOpen } from "lucide-react";
 import { logEnvSummary, logConfig } from "@/lib/logSafe";
 import { DebugWrapper } from "@/components/DebugWrapper";
 import { getSiteUrl, SITE_CONFIG } from "@/lib/site";
+import { DesktopNavigation, MobileNavigation } from "@/components/Navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -55,13 +55,7 @@ export const metadata: Metadata = {
   }
 };
 
-const navigation = [
-  { name: "Home", href: "/", icon: Home },
-  { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-  { name: "Learning Hub", href: "/learning", icon: BookOpen },
-  { name: "Calculators", href: "/calculators", icon: Calculator },
-  { name: "About", href: "/about", icon: Target }
-];
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   // Log environment and config in development
@@ -119,18 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Link>
 
                 {/* Desktop Navigation */}
-                <nav className="hidden md:flex items-center space-x-6">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="flex items-center space-x-2 text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
-                    >
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  ))}
-                </nav>
+                <DesktopNavigation />
 
                 <div className="flex items-center space-x-3">
                   <AuthButtons />
@@ -140,20 +123,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </header>
 
             {/* Mobile Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-zinc-200/50 dark:bg-zinc-950/80 dark:border-zinc-800/50">
-              <div className="flex justify-around py-2">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="flex flex-col items-center space-y-1 p-2 text-xs text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-white transition-colors"
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span>{item.name}</span>
-                  </Link>
-                ))}
-              </div>
-            </nav>
+            <MobileNavigation />
 
             <main className="container py-8 pb-20 md:pb-8">
               <div className="relative">

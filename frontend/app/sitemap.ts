@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/about",
     "/calculators",
     "/learning",
+    "/feedback",
     "/auth/signin",
     "/auth/signup"
   ];

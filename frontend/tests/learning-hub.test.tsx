@@ -25,7 +25,6 @@ describe("Learning Hub", () => {
       }
     ];
     const mockProgress = [];
-    const mockBadges = [];
 
     (fetch as any)
       .mockResolvedValueOnce({
@@ -35,10 +34,6 @@ describe("Learning Hub", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockProgress
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockBadges
       });
 
     render(<LearningHubClient />);
@@ -52,21 +47,9 @@ describe("Learning Hub", () => {
     });
   });
 
-  it("shows progress section", async () => {
-    const mockChapters = [
-      {
-        id: "1",
-        title: "Test Chapter",
-        slug: "test-chapter",
-        description: "A test chapter",
-        level: "BEGINNER",
-        category: "BASICS",
-        order: 1,
-        estimatedTime: 15
-      }
-    ];
+  it("shows fallback UI when no chapters are available", async () => {
+    const mockChapters = [];
     const mockProgress = [];
-    const mockBadges = [];
 
     (fetch as any)
       .mockResolvedValueOnce({
@@ -76,10 +59,6 @@ describe("Learning Hub", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => mockProgress
-      })
-      .mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockBadges
       });
 
     render(<LearningHubClient />);
@@ -89,11 +68,11 @@ describe("Learning Hub", () => {
       expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
     });
 
-    // Check that progress section is rendered
+    // Check that fallback UI is shown when no chapters are available
     await waitFor(() => {
-      expect(screen.getByText("Your Progress")).toBeInTheDocument();
-      expect(screen.getByText("Completed")).toBeInTheDocument();
-      expect(screen.getByText("Remaining")).toBeInTheDocument();
+      expect(screen.getByText("Learning content is being prepared")).toBeInTheDocument();
+      expect(screen.getByText("Our comprehensive learning modules are being set up. Please check back soon!")).toBeInTheDocument();
+      expect(screen.getByText("Refresh Page")).toBeInTheDocument();
     });
   });
 
@@ -105,7 +84,8 @@ describe("Learning Hub", () => {
 
     // In loading state, we should see the skeleton elements
     await waitFor(() => {
-      expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
+      // Check for skeleton loading elements by looking for the animate-pulse class
+      expect(document.querySelector('.animate-pulse')).toBeInTheDocument();
     });
   });
 

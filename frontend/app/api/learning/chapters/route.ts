@@ -6,6 +6,18 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    // Test database connection first
+    try {
+      await prisma.$connect();
+    } catch (dbError) {
+      console.error("Database connection failed:", dbError);
+      return NextResponse.json({ 
+        error: "Database connection failed", 
+        details: "Unable to connect to the database. Please try again later.",
+        chapters: [] // Return empty array instead of failing
+      }, { status: 503 });
+    }
+
     const { searchParams } = new URL(request.url);
     const level = searchParams.get("level");
     const category = searchParams.get("category");
@@ -32,6 +44,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(chapters);
   } catch (error) {
     console.error("Error fetching chapters:", error);
-    return NextResponse.json({ error: "Failed to fetch chapters", details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+    
+    // Return empty array instead of error to prevent frontend crashes
+    return NextResponse.json({ 
+      error: "Failed to fetch chapters", 
+      details: error instanceof Error ? error.message : 'Unknown error',
+      chapters: [] // Provide fallback data
+    }, { status: 500 });
+  } finally {
+    // Always disconnect to free up connections
+    try {
+      await prisma.$disconnect();
+    } catch (disconnectError) {
+      console.error("Error disconnecting from database:", disconnectError);
+    }
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Check, X } from "lucide-react";
 
 interface PasswordStrengthIndicatorProps {
@@ -18,13 +18,14 @@ export default function PasswordStrengthIndicator({
   password, 
   className = "" 
 }: PasswordStrengthIndicatorProps) {
-  const [requirements, setRequirements] = useState<Requirement[]>([
-    { label: "At least 8 characters", test: (pwd) => pwd.length >= 8, met: false },
-    { label: "At least one lowercase letter", test: (pwd) => /[a-z]/.test(pwd), met: false },
-    { label: "At least one uppercase letter", test: (pwd) => /[A-Z]/.test(pwd), met: false },
-    { label: "At least one number", test: (pwd) => /\d/.test(pwd), met: false },
-    { label: "At least one special character (@$!%*?&)", test: (pwd) => /[@$!%*?&]/.test(pwd), met: false }
-  ]);
+  // Define requirements statically to avoid recreation on every render
+  const requirementDefinitions = useMemo(() => [
+    { label: "At least 8 characters", test: (pwd: string) => pwd.length >= 8 },
+    { label: "At least one lowercase letter", test: (pwd: string) => /[a-z]/.test(pwd) },
+    { label: "At least one uppercase letter", test: (pwd: string) => /[A-Z]/.test(pwd) },
+    { label: "At least one number", test: (pwd: string) => /\d/.test(pwd) },
+    { label: "At least one special character (@$!%*?&)", test: (pwd: string) => /[@$!%*?&]/.test(pwd) }
+  ], []);
 
   const [strength, setStrength] = useState<{
     score: number;
@@ -32,16 +33,17 @@ export default function PasswordStrengthIndicator({
     color: string;
   }>({ score: 0, label: "Very Weak", color: "bg-red-500" });
 
-  useEffect(() => {
-    // Update requirements
-    const updatedRequirements = requirements.map(req => ({
+  // Calculate requirements and strength based on password
+  const requirements = useMemo(() => {
+    return requirementDefinitions.map(req => ({
       ...req,
       met: req.test(password)
     }));
-    setRequirements(updatedRequirements);
+  }, [password, requirementDefinitions]);
 
+  useEffect(() => {
     // Calculate strength
-    const metCount = updatedRequirements.filter(req => req.met).length;
+    const metCount = requirements.filter(req => req.met).length;
     const totalRequirements = requirements.length;
     const score = Math.round((metCount / totalRequirements) * 100);
 
@@ -63,7 +65,7 @@ export default function PasswordStrengthIndicator({
     }
 
     setStrength({ score, label, color });
-  }, [password, requirements]);
+  }, [requirements]);
 
   if (!password) return null;
 

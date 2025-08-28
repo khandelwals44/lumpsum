@@ -43,13 +43,23 @@ export default function LearningHubClient() {
       
       if (response.ok) {
         const data = await response.json();
-        setChapters(data);
+        // Handle case where API returns error object with chapters array
+        if (data.chapters && Array.isArray(data.chapters)) {
+          setChapters(data.chapters);
+        } else if (Array.isArray(data)) {
+          setChapters(data);
+        } else {
+          console.error("Invalid chapters data format:", data);
+          setChapters([]);
+        }
       } else {
         const errorData = await response.json();
         console.error("Failed to fetch chapters:", errorData);
+        setChapters([]); // Set empty array to prevent crashes
       }
     } catch (error) {
       console.error("Failed to fetch chapters:", error);
+      setChapters([]); // Set empty array to prevent crashes
     } finally {
       setLoading(false);
     }
@@ -62,12 +72,18 @@ export default function LearningHubClient() {
       if (response.ok) {
         const data = await response.json();
         setUserProgress(data);
+      } else if (response.status === 401) {
+        // User is not authenticated, set empty progress
+        // User not authenticated, setting empty progress
+        setUserProgress([]);
       } else {
         const errorData = await response.json();
         console.error("Failed to fetch progress:", errorData);
+        setUserProgress([]);
       }
     } catch (error) {
       console.error("Failed to fetch progress:", error);
+      setUserProgress([]);
     }
   };
 
@@ -110,6 +126,39 @@ export default function LearningHubClient() {
               <div key={i} className="h-48 bg-gray-200 rounded"></div>
             ))}
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show fallback when no chapters are available
+  if (chapters.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Mutual Fund University
+          </h1>
+          <p className="text-xl text-gray-600 mb-8">
+            Master the art of mutual fund investing with our comprehensive curriculum
+          </p>
+          
+          <Card className="max-w-md mx-auto">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">
+                  Learning content is being prepared
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Our comprehensive learning modules are being set up. Please check back soon!
+                </p>
+                <Button onClick={() => window.location.reload()} variant="outline">
+                  Refresh Page
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

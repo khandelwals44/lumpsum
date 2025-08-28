@@ -268,3 +268,23 @@ model InvestorGuide {
   
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Feedback {
+  id                String   @id @default(cuid())
+  name              String
+  email             String
+  type              String
+  subject           String
+  message           String   @db.Text
+  priority          String   @default("medium")
+  includeSystemInfo Boolean  @default(true)
+  allowContact      Boolean  @default(true)
+  systemInfo        String?  @db.Text
+  status            String   @default("new") // new, in_progress, resolved, closed
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+}

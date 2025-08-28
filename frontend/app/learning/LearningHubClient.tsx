@@ -62,12 +62,18 @@ export default function LearningHubClient() {
       if (response.ok) {
         const data = await response.json();
         setUserProgress(data);
+      } else if (response.status === 401) {
+        // User is not authenticated, set empty progress
+        console.log("User not authenticated, setting empty progress");
+        setUserProgress([]);
       } else {
         const errorData = await response.json();
         console.error("Failed to fetch progress:", errorData);
+        setUserProgress([]);
       }
     } catch (error) {
       console.error("Failed to fetch progress:", error);
+      setUserProgress([]);
     }
   };
 

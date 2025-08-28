@@ -23,9 +23,19 @@ function getProviders() {
       providers.push(
         GoogleProvider({
           clientId: envVars.GOOGLE_CLIENT_ID,
-          clientSecret: envVars.GOOGLE_CLIENT_SECRET
+          clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+          authorization: {
+            params: {
+              prompt: "consent",
+              access_type: "offline",
+              response_type: "code"
+            }
+          }
         })
       );
+      console.log('Google OAuth provider configured successfully');
+    } else {
+      console.warn('Google OAuth not configured: Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
     }
   } catch (error) {
     console.warn('Google OAuth not configured:', error);
@@ -60,11 +70,15 @@ export const authOptions: NextAuthOptions = {
   providers: getProviders(),
   secret: process.env.NEXTAUTH_SECRET || 'fallback-secret-for-development',
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
+  debug: process.env.NODE_ENV === 'development',
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = (user as any).id;
         token.role = (user as any).role ?? "USER";
+      }
+      if (account) {
+        token.provider = account.provider;
       }
       return token;
     },
@@ -85,6 +99,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
   pages: {
-    signIn: "/auth/signin"
+    signIn: "/auth/signin",
+    error: "/auth/error"
   }
 };

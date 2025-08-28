@@ -39,10 +39,17 @@ export default function LearningHubClient() {
 
   const fetchChapters = async () => {
     try {
+      console.log("Fetching chapters...");
       const response = await fetch("/api/learning/chapters");
+      console.log("Response status:", response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log("Chapters data:", data);
         setChapters(data);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to fetch chapters:", errorData);
       }
     } catch (error) {
       console.error("Failed to fetch chapters:", error);
@@ -53,10 +60,17 @@ export default function LearningHubClient() {
 
   const fetchUserProgress = async () => {
     try {
+      console.log("Fetching user progress...");
       const response = await fetch("/api/learning/progress");
+      console.log("Progress response status:", response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log("Progress data:", data);
         setUserProgress(data);
+      } else {
+        const errorData = await response.json();
+        console.error("Failed to fetch progress:", errorData);
       }
     } catch (error) {
       console.error("Failed to fetch progress:", error);

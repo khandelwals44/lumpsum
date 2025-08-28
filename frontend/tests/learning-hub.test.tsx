@@ -84,8 +84,8 @@ describe("Learning Hub", () => {
 
     // In loading state, we should see the skeleton elements
     await waitFor(() => {
-      // Check for skeleton loading elements by looking for the container
-      expect(screen.getByText("Mutual Fund University")).toBeInTheDocument();
+      // Check for skeleton loading elements by looking for the animate-pulse class
+      expect(document.querySelector('.animate-pulse')).toBeInTheDocument();
     });
   });
 

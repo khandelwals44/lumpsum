@@ -13,6 +13,7 @@ import { logEnvSummary, logConfig } from "@/lib/logSafe";
 import { DebugWrapper } from "@/components/DebugWrapper";
 import { getSiteUrl, SITE_CONFIG } from "@/lib/site";
 import { DesktopNavigation, MobileNavigation } from "@/components/Navigation";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -145,6 +146,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <AnalyticsSlot />
             <RegisterSW />
             <DebugWrapper />
+            <Toaster position="top-right" richColors />
           </ClientSession>
         </ThemeProvider>
       </body>

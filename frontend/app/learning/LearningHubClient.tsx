@@ -74,7 +74,7 @@ export default function LearningHubClient() {
         setUserProgress(data);
       } else if (response.status === 401) {
         // User is not authenticated, set empty progress
-        console.log("User not authenticated, setting empty progress");
+        // User not authenticated, setting empty progress
         setUserProgress([]);
       } else {
         const errorData = await response.json();

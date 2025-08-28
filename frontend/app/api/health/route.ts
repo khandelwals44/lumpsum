@@ -4,10 +4,19 @@ import { prisma } from "@/lib/prisma";
 export async function GET(request: NextRequest) {
   try {
     // Test database connection
-    const dbTest = await prisma.$queryRaw`SELECT 1 as test`;
+    let dbConnected = false;
+    let chaptersCount = 0;
     
-    // Test learning chapters count
-    const chaptersCount = await prisma.learningChapter.count();
+    try {
+      const dbTest = await prisma.$queryRaw`SELECT 1 as test`;
+      dbConnected = true;
+      
+      // Test learning chapters count
+      chaptersCount = await prisma.learningChapter.count();
+    } catch (dbError) {
+      console.warn("Database connection failed during health check:", dbError);
+      dbConnected = false;
+    }
     
     // Check environment variables (without exposing secrets)
     const envCheck = {
@@ -23,10 +32,10 @@ export async function GET(request: NextRequest) {
     };
 
     return NextResponse.json({
-      status: "healthy",
+      status: dbConnected ? "healthy" : "degraded",
       timestamp: new Date().toISOString(),
       database: {
-        connected: true,
+        connected: dbConnected,
         chaptersCount
       },
       environment: envCheck

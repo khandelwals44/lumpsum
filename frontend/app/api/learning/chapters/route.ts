@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    console.log(`Found ${chapters.length} chapters`);
     return NextResponse.json(chapters);
   } catch (error) {
     console.error("Error fetching chapters:", error);

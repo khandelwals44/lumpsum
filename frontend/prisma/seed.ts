@@ -184,7 +184,8 @@ Investing a large amount at once in a mutual fund.
       update: {},
       create: {
         ...chapter,
-        level: levelMap[chapter.level] ?? "BEGINNER"
+        level: (levelMap[chapter.level] ?? "BEGINNER") as any,
+        category: chapter.category as any
       }
     });
   }

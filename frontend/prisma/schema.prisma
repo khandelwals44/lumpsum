@@ -10,6 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
+enum LearningLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  PROFESSIONAL
+}
+
+enum LearningCategory {
+  BASICS
+  INVESTMENT
+  DISTRIBUTOR
+  RESEARCH
+}
+
 // Level enum values as strings
 // BEGINNER, INTERMEDIATE, ADVANCED
 
@@ -180,11 +195,11 @@ model LearningChapter {
   slug          String   @unique
   description   String?
   content       String   @db.Text
-  level         String   @default("BEGINNER") // BEGINNER, INTERMEDIATE, ADVANCED
+  level         LearningLevel
   order         Int
   estimatedTime Int      // in minutes
   isActive      Boolean  @default(true)
-  category      String
+  category      LearningCategory
   tags          String   // JSON array as string
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

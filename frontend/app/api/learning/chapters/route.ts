@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+// Force dynamic rendering for this route
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -26,9 +29,10 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    console.log(`Found ${chapters.length} chapters`);
     return NextResponse.json(chapters);
   } catch (error) {
     console.error("Error fetching chapters:", error);
-    return NextResponse.json({ error: "Failed to fetch chapters" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to fetch chapters", details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

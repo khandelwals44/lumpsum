@@ -12,7 +12,7 @@ import { calculateLumpsum } from "@/lib/calc/lumpsum";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ShareButton } from "@/components/ShareButton";
-import ExportButton from "@/components/export/ExportButton";
+import ExportButtons from "@/components/export/ExportButton";
 import { ChartContainer } from "@/components/ChartContainer";
 import { CalculatorLayout, CalculatorCard, ResultsCard } from "@/components/CalculatorLayout";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
@@ -54,28 +54,105 @@ function InvestClient() {
   const data = mode === "sip" ? sip.series : lump.series;
   const result = mode === "sip" ? sip : lump;
 
-  const getExportData = () => ({
-    inputs: mode === "sip" ? {
-      "Monthly Investment": `₹${amount.toLocaleString()}`,
-      "Expected Return (p.a.)": `${rate}%`,
-      "Duration": `${years} years`
-    } : {
-      "Investment Amount": `₹${principal.toLocaleString()}`,
-      "Expected Return (p.a.)": `${rate}%`,
-      "Duration": `${years} years`
-    },
-    results: mode === "sip" ? {
-      "Maturity Value": `₹${sip.maturity.toLocaleString()}`,
-      "Total Invested": `₹${sip.totalInvested.toLocaleString()}`,
-      "Total Gains": `₹${sip.gains.toLocaleString()}`,
-      "Return on Investment": `${((sip.gains / sip.totalInvested) * 100).toFixed(2)}%`
-    } : {
-      "Future Value": `₹${lump.futureValue.toLocaleString()}`,
-      "Total Gains": `₹${lump.gains.toLocaleString()}`,
-      "Return on Investment": `${((lump.gains / principal) * 100).toFixed(2)}%`
-    },
-    chartData: data
-  });
+  const getExportData = () => {
+    const result = mode === "sip" ? sip : lump;
+
+    // Calculate CAGR and other metrics
+    const totalAmount = mode === "sip" ? sip.maturity : lump.futureValue;
+    const initialAmount = mode === "sip" ? sip.totalInvested : principal;
+    const finalAmount = totalAmount;
+
+    // CAGR calculation: (Final Value / Initial Value)^(1/Time) - 1
+    const cagr = years > 0 ? (Math.pow(finalAmount / initialAmount, 1 / years) - 1) * 100 : 0;
+    const absoluteReturn = mode === "sip" ? sip.gains : lump.gains;
+    const roi = (absoluteReturn / initialAmount) * 100;
+
+    // Monthly breakdown
+    const monthlyBreakdown = data.slice(0, 60).map((item, index) => ({
+      Month: index + 1,
+      Investment: mode === "sip" ? amount : (index === 0 ? principal : 0),
+      Value: item.value,
+      Interest: mode === "sip"
+        ? item.value - (amount * (index + 1))
+        : item.value - principal,
+      "Total Invested": mode === "sip" ? amount * (index + 1) : principal,
+      "Portfolio Value": item.value
+    }));
+
+    // Yearly breakdown
+    const yearlyBreakdown = [];
+    for (let year = 1; year <= years; year++) {
+      const yearStart = (year - 1) * 12;
+      const yearEnd = Math.min(year * 12, data.length);
+      const yearData = data.slice(yearStart, yearEnd);
+
+      if (mode === "sip") {
+        const yearInvestment = yearData.length * amount;
+        const yearStartValue = yearData[0]?.value || 0;
+        const yearEndValue = yearData[yearData.length - 1]?.value || 0;
+        const yearGain = yearEndValue - (yearData.length * amount);
+
+        yearlyBreakdown.push({
+          Year: year,
+          "Annual Investment": yearInvestment,
+          "Portfolio Value": yearEndValue,
+          "Annual Gain": yearGain,
+          "Annual Return": yearStartValue > 0 ? ((yearEndValue - yearStartValue) / yearStartValue) * 100 : 0
+        });
+      } else {
+        const yearStartValue = yearData[0]?.value || 0;
+        const yearEndValue = yearData[yearData.length - 1]?.value || 0;
+        const yearGain = yearEndValue - yearStartValue;
+
+        yearlyBreakdown.push({
+          Year: year,
+          "Initial Value": year === 1 ? principal : yearStartValue,
+          "Final Value": yearEndValue,
+          "Annual Gain": yearGain,
+          "Annual Return": yearStartValue > 0 ? ((yearEndValue - yearStartValue) / yearStartValue) * 100 : 0
+        });
+      }
+    }
+
+    return {
+      inputs: mode === "sip" ? {
+        "Monthly Investment": `₹${amount.toLocaleString()}`,
+        "Expected Return (p.a.)": `${rate}%`,
+        "Duration": `${years} years`,
+        "Total Months": years * 12,
+        "Investment Type": "Systematic Investment Plan (SIP)"
+      } : {
+        "Investment Amount": `₹${principal.toLocaleString()}`,
+        "Expected Return (p.a.)": `${rate}%`,
+        "Duration": `${years} years`,
+        "Total Months": years * 12,
+        "Investment Type": "One-time Lumpsum"
+      },
+      results: mode === "sip" ? {
+        "Maturity Value": `₹${sip.maturity.toLocaleString()}`,
+        "Total Invested": `₹${sip.totalInvested.toLocaleString()}`,
+        "Total Gains": `₹${sip.gains.toLocaleString()}`,
+        "Return on Investment": `${roi.toFixed(2)}%`
+      } : {
+        "Future Value": `₹${lump.futureValue.toLocaleString()}`,
+        "Total Gains": `₹${lump.gains.toLocaleString()}`,
+        "Return on Investment": `${roi.toFixed(2)}%`
+      },
+      summary: {
+        "Absolute Return": `₹${absoluteReturn.toLocaleString()}`,
+        "CAGR": `${cagr.toFixed(2)}%`,
+        "Final Portfolio Value": `₹${totalAmount.toLocaleString()}`,
+        "Investment Strategy": mode === "sip" ? "Monthly SIP" : "One-time Lumpsum",
+        "Average Annual Investment": mode === "sip" ? `₹${(sip.totalInvested / years).toLocaleString()}` : `₹${principal.toLocaleString()}`,
+        "Power of Compounding": mode === "sip" ? "Monthly Contributions" : "Single Investment"
+      },
+      chartData: data,
+      monthlyBreakdown: monthlyBreakdown,
+      yearlyBreakdown: yearlyBreakdown,
+      absoluteReturn: absoluteReturn,
+      cagr: cagr
+    };
+  };
 
   const shareData = {
     title: `${mode.toUpperCase()} Calculator Results`,
@@ -218,12 +295,13 @@ function InvestClient() {
           {/* Export and Share Buttons */}
           {result && (
             <div className="flex gap-3 mt-6 pt-6 border-t border-blue-200 dark:border-blue-800">
-              <ExportButton
+              <ExportButtons
                 data={getExportData()}
                 title={`${mode.toUpperCase()} Calculator Results`}
                 calculatorType={mode === "sip" ? "SIP" : "Lumpsum"}
                 elementRef={resultRef}
-                className="flex-1"
+                layout="horizontal"
+                size="md"
               />
               <ShareButton />
             </div>

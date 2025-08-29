@@ -10,7 +10,7 @@ import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
-import ExportButton from "@/components/export/ExportButton";
+import ExportButtons from "@/components/export/ExportButton";
 import { CalculatorLayout, CalculatorCard, ResultsCard } from "@/components/CalculatorLayout";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
@@ -41,21 +41,81 @@ function FdClient() {
 
   const result = useMemo(() => calculateFd(principal, rate, years, m), [principal, rate, years, m]);
 
-  const getExportData = () => ({
-    inputs: {
-      "Principal": `₹${principal.toLocaleString()}`,
-      "Interest Rate (p.a.)": `${rate}%`,
-      "Duration": `${years} years`,
-      "Compounding per Year": `${m} times`
-    },
-    results: {
-      "Maturity Amount": `₹${result.maturity.toLocaleString()}`,
-      "Interest Earned": `₹${result.interestEarned.toLocaleString()}`,
-      "Return on Investment": `${((result.interestEarned / principal) * 100).toFixed(2)}%`,
-      "Effective Annual Rate": `${(Math.pow(1 + rate / (100 * m), m) - 1) * 100}%`
-    },
-    chartData: result.series
-  });
+  const getExportData = () => {
+    // Calculate CAGR and other metrics
+    const totalAmount = result.maturity;
+    const initialAmount = principal;
+    const finalAmount = totalAmount;
+    const totalYears = years;
+
+    // CAGR calculation for FD: (Final Value / Initial Value)^(1/Time) - 1
+    const cagr = totalYears > 0 ? (Math.pow(finalAmount / initialAmount, 1 / totalYears) - 1) * 100 : 0;
+    const absoluteReturn = result.interestEarned;
+    const roi = (result.interestEarned / principal) * 100;
+    const effectiveRate = (Math.pow(1 + rate / (100 * m), m) - 1) * 100;
+
+    // Monthly breakdown
+    const monthlyBreakdown = result.series.slice(0, 60).map((item, index) => ({
+      Month: index + 1,
+      Principal: principal,
+      Value: item.value,
+      Interest: item.value - principal,
+      "Principal Amount": principal,
+      "FD Value": item.value,
+      "Interest Earned": item.value - principal
+    }));
+
+    // Yearly breakdown
+    const yearlyBreakdown = [];
+    for (let year = 1; year <= years; year++) {
+      const yearStart = (year - 1) * 12;
+      const yearEnd = Math.min(year * 12, result.series.length);
+      const yearData = result.series.slice(yearStart, yearEnd);
+
+      const yearStartValue = yearData[0]?.value || 0;
+      const yearEndValue = yearData[yearData.length - 1]?.value || 0;
+      const yearInterest = yearEndValue - yearStartValue;
+
+      yearlyBreakdown.push({
+        Year: year,
+        "Initial Value": year === 1 ? principal : yearStartValue,
+        "Final Value": yearEndValue,
+        "Annual Interest": yearInterest,
+        "Effective Rate": effectiveRate
+      });
+    }
+
+    return {
+      inputs: {
+        "Principal Amount": `₹${principal.toLocaleString()}`,
+        "Interest Rate (p.a.)": `${rate}%`,
+        "Duration": `${years} years`,
+        "Compounding Frequency": `${m} times per year`,
+        "Total Months": years * 12
+      },
+      results: {
+        "Maturity Amount": `₹${result.maturity.toLocaleString()}`,
+        "Interest Earned": `₹${result.interestEarned.toLocaleString()}`,
+        "Return on Investment": `${roi.toFixed(2)}%`,
+        "Effective Annual Rate": `${effectiveRate.toFixed(2)}%`
+      },
+      summary: {
+        "Absolute Return": `₹${absoluteReturn.toLocaleString()}`,
+        "CAGR": `${cagr.toFixed(2)}%`,
+        "Final FD Value": `₹${result.maturity.toLocaleString()}`,
+        "Risk Level": "Very Low Risk",
+        "Guaranteed Returns": "Yes",
+        "Bank Guarantee": "Up to ₹5 Lakhs",
+        "Lock-in Period": `${years} years`,
+        "Compounding Benefit": `${m} times per year`
+      },
+      chartData: result.series,
+      monthlyBreakdown: monthlyBreakdown,
+      yearlyBreakdown: yearlyBreakdown,
+      absoluteReturn: absoluteReturn,
+      cagr: cagr
+    };
+  };
 
   const shareData = {
     title: "FD Calculator Results",
@@ -131,12 +191,13 @@ function FdClient() {
           {/* Export and Share Buttons */}
           {result.maturity > 0 && (
             <div className="flex gap-3 mt-6 pt-6 border-t border-blue-200 dark:border-blue-800">
-              <ExportButton
+              <ExportButtons
                 data={getExportData()}
                 title="FD Calculator Results"
                 calculatorType="FD"
                 elementRef={resultRef}
-                className="flex-1"
+                layout="horizontal"
+                size="md"
               />
               <ShareButton />
             </div>

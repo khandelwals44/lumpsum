@@ -10,7 +10,7 @@ import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
-import ExportButton from "@/components/export/ExportButton";
+import ExportButtons from "@/components/export/ExportButton";
 import { CalculatorLayout, CalculatorCard, ResultsCard } from "@/components/CalculatorLayout";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
@@ -42,19 +42,73 @@ function LumpsumClient() {
 
   const result = useMemo(() => calculateLumpsum(principal, rate, years), [principal, rate, years]);
 
-  const getExportData = () => ({
-    inputs: {
-      "Investment Amount": `₹${principal.toLocaleString()}`,
-      "Expected Return (p.a.)": `${rate}%`,
-      "Duration": `${years} years`
-    },
-    results: {
-      "Future Value": `₹${result.futureValue.toLocaleString()}`,
-      "Total Gains": `₹${result.gains.toLocaleString()}`,
-      "Return on Investment": `${((result.gains / principal) * 100).toFixed(2)}%`
-    },
-    chartData: result.series
-  });
+  const getExportData = () => {
+    // Calculate CAGR and other metrics
+    const totalAmount = result.futureValue;
+    const initialAmount = principal;
+    const finalAmount = totalAmount;
+
+    // CAGR calculation: (Final Value / Initial Value)^(1/Time) - 1
+    const cagr = years > 0 ? (Math.pow(finalAmount / initialAmount, 1 / years) - 1) * 100 : 0;
+    const absoluteReturn = result.gains;
+    const roi = (result.gains / principal) * 100;
+
+    // Monthly breakdown
+    const monthlyBreakdown = result.series.slice(0, 60).map((item, index) => ({
+      Month: index + 1,
+      Investment: principal,
+      Value: item.value,
+      Interest: item.value - principal,
+      "Principal Amount": principal,
+      "Portfolio Value": item.value
+    }));
+
+    // Yearly breakdown
+    const yearlyBreakdown = [];
+    for (let year = 1; year <= years; year++) {
+      const yearStart = (year - 1) * 12;
+      const yearEnd = Math.min(year * 12, result.series.length);
+      const yearData = result.series.slice(yearStart, yearEnd);
+
+      const yearStartValue = yearData[0]?.value || 0;
+      const yearEndValue = yearData[yearData.length - 1]?.value || 0;
+      const yearGain = yearEndValue - yearStartValue;
+
+      yearlyBreakdown.push({
+        Year: year,
+        "Initial Value": year === 1 ? principal : yearStartValue,
+        "Final Value": yearEndValue,
+        "Annual Gain": yearGain,
+        "Annual Return": yearStartValue > 0 ? ((yearEndValue - yearStartValue) / yearStartValue) * 100 : 0
+      });
+    }
+
+    return {
+      inputs: {
+        "Investment Amount": `₹${principal.toLocaleString()}`,
+        "Expected Return (p.a.)": `${rate}%`,
+        "Duration": `${years} years`,
+        "Total Months": years * 12
+      },
+      results: {
+        "Future Value": `₹${result.futureValue.toLocaleString()}`,
+        "Total Gains": `₹${result.gains.toLocaleString()}`,
+        "Return on Investment": `${roi.toFixed(2)}%`
+      },
+      summary: {
+        "Absolute Return": `₹${absoluteReturn.toLocaleString()}`,
+        "CAGR": `${cagr.toFixed(2)}%`,
+        "Final Portfolio Value": `₹${result.futureValue.toLocaleString()}`,
+        "Investment Strategy": "One-time Lumpsum",
+        "Risk Level": "Market Risk"
+      },
+      chartData: result.series,
+      monthlyBreakdown: monthlyBreakdown,
+      yearlyBreakdown: yearlyBreakdown,
+      absoluteReturn: absoluteReturn,
+      cagr: cagr
+    };
+  };
 
   const shareData = {
     title: "Lumpsum Calculator Results",
@@ -136,12 +190,13 @@ function LumpsumClient() {
           {/* Export and Share Buttons */}
           {result.futureValue > 0 && (
             <div className="flex gap-3 mt-6 pt-6 border-t border-blue-200 dark:border-blue-800">
-              <ExportButton
+              <ExportButtons
                 data={getExportData()}
                 title="Lumpsum Calculator Results"
                 calculatorType="Lumpsum"
                 elementRef={resultRef}
-                className="flex-1"
+                layout="horizontal"
+                size="md"
               />
               <ShareButton />
             </div>

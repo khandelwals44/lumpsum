@@ -1,16 +1,48 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { calculateGst, type GstMode } from "@/lib/calc/gst";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { formatINR } from "@/lib/format";
 
 export default function GstPage() {
   const [amount, setAmount] = useState(1000);
   const [rate, setRate] = useState(18);
   const [mode, setMode] = useState<GstMode>("exclusive");
+  const resultRef = useRef<HTMLDivElement>(null);
   const res = useMemo(() => calculateGst(amount, rate, mode), [amount, rate, mode]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Amount": `₹${amount.toLocaleString()}`,
+      "GST Rate": `${rate}%`,
+      "Mode": mode === "exclusive" ? "Price without GST" : "Price with GST included"
+    },
+    results: {
+      "Base Amount": `₹${res.base.toLocaleString()}`,
+      "GST Tax": `₹${res.tax.toLocaleString()}`,
+      "CGST": `₹${res.cgst.toLocaleString()}`,
+      "SGST": `₹${res.sgst.toLocaleString()}`,
+      "Gross Amount": `₹${res.gross.toLocaleString()}`,
+      "Tax Percentage": `${((res.tax / res.base) * 100).toFixed(2)}%`
+    },
+    chartData: [
+      { component: "Base", amount: res.base },
+      { component: "CGST", amount: res.cgst },
+      { component: "SGST", amount: res.sgst }
+    ]
+  });
+
+  const shareData = {
+    title: "GST Calculator Results",
+    description: `GST calculation: ${mode === "exclusive" ? "Base" : "Gross"} amount ₹${amount.toLocaleString()} at ${rate}% GST = ₹${res.gross.toLocaleString()}`,
+    url: window.location.href,
+    calculatorType: "GST",
+    results: getExportData()
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <section className="space-y-4">
@@ -54,13 +86,27 @@ export default function GstPage() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Base" value={res.base} currency />
           <ResultStat label="Tax" value={res.tax} currency />
           <ResultStat label="CGST" value={res.cgst} currency />
           <ResultStat label="SGST" value={res.sgst} currency />
           <ResultStat label="Gross" value={res.gross} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {res.gross > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="GST Calculator Results"
+              calculatorType="GST"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section>
         <div className="rounded-md border border-zinc-200 p-4 text-sm dark:border-zinc-800">

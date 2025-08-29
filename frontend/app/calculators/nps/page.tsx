@@ -3,12 +3,13 @@
  * - Accumulation via SIP math in lib/calc/nps and simple annuity estimate
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateNps } from "@/lib/calc/nps";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
 import { formatINR } from "@/lib/format";
@@ -33,9 +34,34 @@ function NpsClient() {
   const [years, setYears] = useState(parseParamNumber(sp, "y", 25));
   const [pre, setPre] = useState(parseParamNumber(sp, "pre", 10));
   const [post, setPost] = useState(parseParamNumber(sp, "post", 6));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ a: amount, y: years, pre, post });
 
   const result = useMemo(() => calculateNps(amount, years, pre, post), [amount, years, pre, post]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Monthly Contribution": `₹${amount.toLocaleString()}`,
+      "Years to Retirement": `${years} years`,
+      "Pre-retirement Return": `${pre}%`,
+      "Annuity Rate": `${post}%`
+    },
+    results: {
+      "Corpus at Retirement": `₹${result.corpus.toLocaleString()}`,
+      "Estimated Monthly Pension": `₹${result.estimatedPension.toLocaleString()}`,
+      "Total Investment": `₹${(amount * years * 12).toLocaleString()}`,
+      "Total Returns": `₹${(result.corpus - amount * years * 12).toLocaleString()}`
+    },
+    chartData: result.series
+  });
+
+  const shareData = {
+    title: "NPS Calculator Results",
+    description: `Monthly NPS contribution of ₹${amount.toLocaleString()} for ${years} years will create a corpus of ₹${result.corpus.toLocaleString()} with monthly pension of ₹${result.estimatedPension.toLocaleString()}`,
+    url: window.location.href,
+    calculatorType: "NPS",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -95,10 +121,24 @@ function NpsClient() {
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Corpus at retirement" value={result.corpus} currency />
           <ResultStat label="Estimated monthly pension" value={result.estimatedPension} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.corpus > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="NPS Calculator Results"
+              calculatorType="NPS"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section className="space-y-4">
         <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">

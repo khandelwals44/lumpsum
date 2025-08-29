@@ -1,10 +1,11 @@
 "use client";
 /** Step-up SIP Calculator (UI only) */
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateStepUpSip } from "@/lib/calc/stepupSip";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { ChartContainer } from "@/components/ChartContainer";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
@@ -30,12 +31,37 @@ function StepUpClient() {
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 12));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 15));
   const [step, setStep] = useState(parseParamNumber(sp, "s", 10));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ a: base, r: rate, y: years, s: step });
 
   const result = useMemo(
     () => calculateStepUpSip(base, rate, years, step),
     [base, rate, years, step]
   );
+
+  const getExportData = () => ({
+    inputs: {
+      "Base Monthly Amount": `₹${base.toLocaleString()}`,
+      "Expected Return (p.a.)": `${rate}%`,
+      "Duration": `${years} years`,
+      "Step-up per Year": `${step}%`
+    },
+    results: {
+      "Maturity Amount": `₹${result.maturity.toLocaleString()}`,
+      "Total Invested": `₹${result.totalInvested.toLocaleString()}`,
+      "Total Gains": `₹${result.gains.toLocaleString()}`,
+      "Return on Investment": `${((result.gains / result.totalInvested) * 100).toFixed(2)}%`
+    },
+    chartData: result.series
+  });
+
+  const shareData = {
+    title: "Step-up SIP Calculator Results",
+    description: `Step-up SIP starting with ₹${base.toLocaleString()} monthly, increasing by ${step}% yearly for ${years} years at ${rate}% p.a. will grow to ₹${result.maturity.toLocaleString()}`,
+    url: window.location.href,
+    calculatorType: "Step-up SIP",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -83,11 +109,25 @@ function StepUpClient() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Maturity" value={result.maturity} currency />
           <ResultStat label="Total Invested" value={result.totalInvested} currency />
           <ResultStat label="Gains" value={result.gains} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.maturity > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="Step-up SIP Calculator Results"
+              calculatorType="Step-up SIP"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section>
         <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">

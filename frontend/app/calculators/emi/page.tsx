@@ -5,13 +5,14 @@
  * - Syncs URL for shareable state
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateEmi } from "@/lib/calc/emi";
 import { NumberInput } from "@/components/NumberInput";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { SocialShare } from "@/components/SocialShare";
 import { Area, AreaChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
@@ -36,10 +37,34 @@ function EmiClient() {
   const [principal, setPrincipal] = useState<number>(parseParamNumber(sp, "p", 1000000));
   const [rate, setRate] = useState<number>(parseParamNumber(sp, "r", 9));
   const [months, setMonths] = useState<number>(parseParamNumber(sp, "n", 120));
+  const resultRef = useRef<HTMLDivElement>(null);
 
   useUrlState({ p: principal, r: rate, n: months });
 
   const result = useMemo(() => calculateEmi(principal, rate, months), [principal, rate, months]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Loan Amount": `₹${principal.toLocaleString()}`,
+      "Interest Rate (p.a.)": `${rate}%`,
+      "Tenure": `${months} months`
+    },
+    results: {
+      "EMI": `₹${result.emi.toLocaleString()}`,
+      "Total Interest": `₹${result.totalInterest.toLocaleString()}`,
+      "Total Payment": `₹${result.totalPayment.toLocaleString()}`,
+      "Interest Rate": `${((result.totalInterest / principal) * 100).toFixed(2)}%`
+    },
+    chartData: result.schedule
+  });
+
+  const shareData = {
+    title: "EMI Calculator Results",
+    description: `EMI of ₹${result.emi.toLocaleString()} for loan of ₹${principal.toLocaleString()} at ${rate}% p.a. for ${months} months`,
+    url: window.location.href,
+    calculatorType: "EMI",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -84,11 +109,25 @@ function EmiClient() {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="EMI" value={result.emi} currency />
           <ResultStat label="Total Interest" value={result.totalInterest} currency />
           <ResultStat label="Total Payment" value={result.totalPayment} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.emi > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="EMI Calculator Results"
+              calculatorType="EMI"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
 
       <section className="space-y-4">

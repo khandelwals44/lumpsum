@@ -1,6 +1,7 @@
 /**
  * Lumpsum Calculator Page (UI only)
  * - Delegates FV math to lib/calc/lumpsum
+ * - Modern UI/UX with improved styling
  */
 "use client";
 import { Suspense, useMemo, useState, useRef } from "react";
@@ -10,6 +11,7 @@ import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
 import ExportButton from "@/components/export/ExportButton";
+import { CalculatorLayout, CalculatorCard, ResultsCard } from "@/components/CalculatorLayout";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
 import { formatINR } from "@/lib/format";
@@ -63,40 +65,46 @@ function LumpsumClient() {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <section className="space-y-4">
-        <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Lumpsum Calculator</h1>
-            <ShareButton />
-          </div>
-          <div className="mt-4 space-y-4">
-            <SliderWithInput
-              label="Investment amount"
-              value={principal}
-              onChange={setPrincipal}
-              min={1000}
-              max={10000000}
-              step={1000}
-              suffix="₹"
-            />
-            <SliderWithInput
-              label="Expected return (p.a.)"
-              value={rate}
-              onChange={setRate}
-              min={0}
-              max={30}
-              step={0.1}
-              suffix="%"
-            />
-            <SliderWithInput
-              label="Duration (years)"
-              value={years}
-              onChange={setYears}
-              min={1}
-              max={40}
-              step={1}
-            />
+    <CalculatorLayout 
+      title="Lumpsum Calculator" 
+      description="Calculate your one-time investment returns with detailed growth projections"
+    >
+      {/* Input Section */}
+      <CalculatorCard>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Investment Details</h2>
+          <ShareButton />
+        </div>
+        
+        <div className="space-y-6">
+          <SliderWithInput
+            label="Investment amount"
+            value={principal}
+            onChange={setPrincipal}
+            min={1000}
+            max={10000000}
+            step={1000}
+            suffix="₹"
+          />
+          <SliderWithInput
+            label="Expected return (p.a.)"
+            value={rate}
+            onChange={setRate}
+            min={0}
+            max={30}
+            step={0.1}
+            suffix="%"
+          />
+          <SliderWithInput
+            label="Duration (years)"
+            value={years}
+            onChange={setYears}
+            min={1}
+            max={40}
+            step={1}
+          />
+          
+          <div className="flex flex-wrap items-center gap-3 pt-4">
             <button
               type="button"
               onClick={() => {
@@ -104,80 +112,86 @@ function LumpsumClient() {
                 setRate(12);
                 setYears(10);
               }}
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+              className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors duration-200 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
             >
               Reset
             </button>
             <SocialShare />
           </div>
         </div>
-        <div ref={resultRef} className="grid grid-cols-2 gap-3">
-          <ResultStat label="Future Value" value={result.futureValue} currency />
-          <ResultStat label="Gains" value={result.gains} currency />
-        </div>
-        
-        {/* Export and Share Buttons */}
-        {result.futureValue > 0 && (
-          <div className="flex gap-2">
-            <ExportButton
-              data={getExportData()}
-              title="Lumpsum Calculator Results"
-              calculatorType="Lumpsum"
-              elementRef={resultRef}
-              className="flex-1"
-            />
-            <ShareButton />
+      </CalculatorCard>
+
+      {/* Results Section */}
+      <div className="space-y-6">
+        <ResultsCard>
+          <div ref={resultRef}>
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Investment Results</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ResultStat label="Future Value" value={result.futureValue} currency />
+              <ResultStat label="Total Gains" value={result.gains} currency />
+              <ResultStat label="ROI" value={(result.gains / principal) * 100} suffix="%" />
+            </div>
           </div>
-        )}
-      </section>
-      <section className="space-y-4">
-        <FadeIn>
-          <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
-            <h2 className="text-lg font-medium">Growth over time</h2>
-            <ChartContainer>
-              <LineChart data={result.series} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tickLine={false} />
-                <YAxis tickFormatter={(v) => formatINR(v as number)} tickLine={false} />
-                <Tooltip formatter={(v) => formatINR(v as number)} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke={chartColors.value}
-                  name="Value"
-                  dot={false}
-                />
-              </LineChart>
-            </ChartContainer>
-          </div>
-        </FadeIn>
-        <article className="prose mt-2 dark:prose-invert">
-          <details open>
-            <summary>What is a Lumpsum investment?</summary>
-            <p>A one-time investment amount that grows with compounding over time.</p>
-          </details>
-          <details>
-            <summary>How it works (formula)</summary>
-            <p>Monthly rate i = R/12/100, n = years×12. Future Value = P × (1+i)^n</p>
-          </details>
-          <details>
-            <summary>How to use this calculator</summary>
-            <ol>
-              <li>Enter the one-time amount, expected annual return, and duration.</li>
-              <li>Observe the compounding curve; adjust inputs to compare scenarios.</li>
-              <li>Share the URL to keep your input state.</li>
-            </ol>
-          </details>
-          <details>
-            <summary>FAQs</summary>
-            <ul>
-              <li>Is the return guaranteed? No—market-linked.</li>
-              <li>How often is compounding? We use monthly compounding here.</li>
-            </ul>
-          </details>
-        </article>
-      </section>
-    </div>
+          
+          {/* Export and Share Buttons */}
+          {result.futureValue > 0 && (
+            <div className="flex gap-3 mt-6 pt-6 border-t border-blue-200 dark:border-blue-800">
+              <ExportButton
+                data={getExportData()}
+                title="Lumpsum Calculator Results"
+                calculatorType="Lumpsum"
+                elementRef={resultRef}
+                className="flex-1"
+              />
+              <ShareButton />
+            </div>
+          )}
+        </ResultsCard>
+
+        {/* Chart Section */}
+        <CalculatorCard>
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">Growth Over Time</h3>
+          <ChartContainer>
+            <LineChart 
+              data={result.series} 
+              margin={{ left: 60, right: 30, top: 20, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="month" 
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+              />
+              <YAxis 
+                tickFormatter={(v) => formatINR(v as number)} 
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                width={80}
+              />
+              <Tooltip 
+                formatter={(v) => formatINR(v as number)}
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Legend />
+              <Line
+                dataKey="value"
+                type="monotone"
+                stroke={chartColors.value}
+                name="Investment Value"
+                dot={false}
+                strokeWidth={2}
+              />
+            </LineChart>
+          </ChartContainer>
+        </CalculatorCard>
+      </div>
+    </CalculatorLayout>
   );
 }

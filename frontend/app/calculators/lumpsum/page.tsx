@@ -126,7 +126,7 @@ function LumpsumClient() {
               elementRef={resultRef}
               className="flex-1"
             />
-            <ShareButton data={shareData} className="flex-1" />
+            <ShareButton />
           </div>
         )}
       </section>

@@ -38,7 +38,7 @@ export default function GstPage() {
   const shareData = {
     title: "GST Calculator Results",
     description: `GST calculation: ${mode === "exclusive" ? "Base" : "Gross"} amount ₹${amount.toLocaleString()} at ${rate}% GST = ₹${res.gross.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "GST",
     results: getExportData()
   };

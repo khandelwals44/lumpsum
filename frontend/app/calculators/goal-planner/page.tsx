@@ -61,7 +61,7 @@ function GoalPlannerClient() {
   const shareData = {
     title: "Goal Planner Results",
     description: `To achieve ₹${goalToday.toLocaleString()} in ${years} years, you need ₹${result.requiredSIP.toLocaleString()} monthly SIP or ₹${result.requiredLumpsum.toLocaleString()} lumpsum`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "Goal Planner",
     results: getExportData()
   };

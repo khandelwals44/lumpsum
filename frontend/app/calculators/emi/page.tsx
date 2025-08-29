@@ -61,7 +61,7 @@ function EmiClient() {
   const shareData = {
     title: "EMI Calculator Results",
     description: `EMI of ₹${result.emi.toLocaleString()} for loan of ₹${principal.toLocaleString()} at ${rate}% p.a. for ${months} months`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "EMI",
     results: getExportData()
   };

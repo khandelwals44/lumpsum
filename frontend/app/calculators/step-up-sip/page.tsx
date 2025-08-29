@@ -58,7 +58,7 @@ function StepUpClient() {
   const shareData = {
     title: "Step-up SIP Calculator Results",
     description: `Step-up SIP starting with ₹${base.toLocaleString()} monthly, increasing by ${step}% yearly for ${years} years at ${rate}% p.a. will grow to ₹${result.maturity.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "Step-up SIP",
     results: getExportData()
   };

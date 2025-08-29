@@ -1,10 +1,11 @@
 "use client";
 /** RD Calculator (UI only) */
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateRd } from "@/lib/calc/rd";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { ChartContainer } from "@/components/ChartContainer";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
@@ -29,8 +30,32 @@ function RdClient() {
   const [monthly, setMonthly] = useState(parseParamNumber(sp, "m", 5000));
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 7));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 5));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ m: monthly, r: rate, y: years });
   const result = useMemo(() => calculateRd(monthly, rate, years), [monthly, rate, years]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Monthly Deposit": `₹${monthly.toLocaleString()}`,
+      "Interest Rate (p.a.)": `${rate}%`,
+      "Duration": `${years} years`
+    },
+    results: {
+      "Maturity Amount": `₹${result.maturity.toLocaleString()}`,
+      "Total Invested": `₹${result.totalInvested.toLocaleString()}`,
+      "Interest Earned": `₹${result.interestEarned.toLocaleString()}`,
+      "Return on Investment": `${((result.interestEarned / result.totalInvested) * 100).toFixed(2)}%`
+    },
+    chartData: result.series
+  });
+
+  const shareData = {
+    title: "RD Calculator Results",
+    description: `Monthly RD deposit of ₹${monthly.toLocaleString()} for ${years} years at ${rate}% p.a. will grow to ₹${result.maturity.toLocaleString()}`,
+    url: window.location.href,
+    calculatorType: "RD",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -69,11 +94,25 @@ function RdClient() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Maturity" value={result.maturity} currency />
           <ResultStat label="Total Invested" value={result.totalInvested} currency />
           <ResultStat label="Interest Earned" value={result.interestEarned} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.maturity > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="RD Calculator Results"
+              calculatorType="RD"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section>
         <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">

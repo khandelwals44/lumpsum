@@ -4,12 +4,13 @@
  * - Offers monthly/yearly toggle for the chart
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateSip } from "@/lib/calc/sip";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis, Brush } from "recharts";
 import { chartColors } from "@/lib/charts";
 import { formatINR } from "@/lib/format";
@@ -42,6 +43,7 @@ function SipClient() {
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 12));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 15));
   const [tf, setTf] = useState<Timeframe>("monthly");
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ a: amount, r: rate, y: years });
 
   const result = useMemo(() => calculateSip(amount, rate, years), [amount, rate, years]);
@@ -57,6 +59,29 @@ function SipClient() {
     }
     return out;
   }, [result.series, tf]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Monthly Investment": `₹${amount.toLocaleString()}`,
+      "Expected Return (p.a.)": `${rate}%`,
+      "Duration": `${years} years`
+    },
+    results: {
+      "Maturity Amount": `₹${result.maturity.toLocaleString()}`,
+      "Total Invested": `₹${result.totalInvested.toLocaleString()}`,
+      "Total Gains": `₹${result.gains.toLocaleString()}`,
+      "Return on Investment": `${((result.gains / result.totalInvested) * 100).toFixed(2)}%`
+    },
+    chartData: chartData
+  });
+
+  const shareData = {
+    title: "SIP Calculator Results",
+    description: `Monthly investment of ₹${amount.toLocaleString()} for ${years} years at ${rate}% p.a. would grow to ₹${result.maturity.toLocaleString()}`,
+    url: window.location.href,
+    calculatorType: "SIP",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -137,11 +162,25 @@ function SipClient() {
             Save Calculation
           </button>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Maturity" value={result.maturity} currency />
           <ResultStat label="Total Invested" value={result.totalInvested} currency />
           <ResultStat label="Gains" value={result.gains} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.maturity > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="SIP Calculator Results"
+              calculatorType="SIP"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton data={shareData} className="flex-1" />
+          </div>
+        )}
       </section>
       <section className="space-y-4">
         <FadeIn>

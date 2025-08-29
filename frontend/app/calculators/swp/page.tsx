@@ -1,9 +1,10 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateSwp } from "@/lib/calc/swp";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { ChartContainer } from "@/components/ChartContainer";
 import { Area, AreaChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
@@ -29,12 +30,38 @@ function SwpClient() {
   const [withdrawal, setWithdrawal] = useState(parseParamNumber(sp, "w", 15000));
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 10));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 20));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ c: corpus, w: withdrawal, r: rate, y: years });
 
   const result = useMemo(
     () => calculateSwp(corpus, withdrawal, rate, years),
     [corpus, withdrawal, rate, years]
   );
+
+  const getExportData = () => ({
+    inputs: {
+      "Initial Corpus": `₹${corpus.toLocaleString()}`,
+      "Monthly Withdrawal": `₹${withdrawal.toLocaleString()}`,
+      "Expected Return (p.a.)": `${rate}%`,
+      "Duration": `${years} years`
+    },
+    results: {
+      "Months Survived": `${result.monthsSurvived} months`,
+      "Total Withdrawn": `₹${result.totalWithdrawn.toLocaleString()}`,
+      "Total Interest": `₹${result.totalInterest.toLocaleString()}`,
+      "Ending Balance": `₹${result.endingBalance.toLocaleString()}`,
+      "Withdrawal Rate": `${((withdrawal * 12 / corpus) * 100).toFixed(2)}%`
+    },
+    chartData: result.series
+  });
+
+  const shareData = {
+    title: "SWP Calculator Results",
+    description: `With ₹${corpus.toLocaleString()} corpus, monthly withdrawal of ₹${withdrawal.toLocaleString()} at ${rate}% p.a. will last ${result.monthsSurvived} months`,
+    url: window.location.href,
+    calculatorType: "SWP",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -82,12 +109,26 @@ function SwpClient() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Months survived" value={result.monthsSurvived} />
           <ResultStat label="Total withdrawn" value={result.totalWithdrawn} currency />
           <ResultStat label="Total interest" value={result.totalInterest} currency />
           <ResultStat label="Ending balance" value={result.endingBalance} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.monthsSurvived > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="SWP Calculator Results"
+              calculatorType="SWP"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section>
         <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">

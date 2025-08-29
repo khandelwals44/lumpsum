@@ -3,12 +3,13 @@
  * - Delegates FV math to lib/calc/lumpsum
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateLumpsum } from "@/lib/calc/lumpsum";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
 import { formatINR } from "@/lib/format";
@@ -34,9 +35,32 @@ function LumpsumClient() {
   const [principal, setPrincipal] = useState(parseParamNumber(sp, "p", 500000));
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 12));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 10));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ p: principal, r: rate, y: years });
 
   const result = useMemo(() => calculateLumpsum(principal, rate, years), [principal, rate, years]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Investment Amount": `₹${principal.toLocaleString()}`,
+      "Expected Return (p.a.)": `${rate}%`,
+      "Duration": `${years} years`
+    },
+    results: {
+      "Future Value": `₹${result.futureValue.toLocaleString()}`,
+      "Total Gains": `₹${result.gains.toLocaleString()}`,
+      "Return on Investment": `${((result.gains / principal) * 100).toFixed(2)}%`
+    },
+    chartData: result.series
+  });
+
+  const shareData = {
+    title: "Lumpsum Calculator Results",
+    description: `Investment of ₹${principal.toLocaleString()} for ${years} years at ${rate}% p.a. would grow to ₹${result.futureValue.toLocaleString()}`,
+    url: window.location.href,
+    calculatorType: "Lumpsum",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -87,10 +111,24 @@ function LumpsumClient() {
             <SocialShare />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Future Value" value={result.futureValue} currency />
           <ResultStat label="Gains" value={result.gains} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.futureValue > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="Lumpsum Calculator Results"
+              calculatorType="Lumpsum"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton data={shareData} className="flex-1" />
+          </div>
+        )}
       </section>
       <section className="space-y-4">
         <FadeIn>

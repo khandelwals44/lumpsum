@@ -57,7 +57,7 @@ function LumpsumClient() {
   const shareData = {
     title: "Lumpsum Calculator Results",
     description: `Investment of ₹${principal.toLocaleString()} for ${years} years at ${rate}% p.a. would grow to ₹${result.futureValue.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "Lumpsum",
     results: getExportData()
   };

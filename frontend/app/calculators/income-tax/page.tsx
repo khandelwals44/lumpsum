@@ -52,7 +52,7 @@ function IncomeTaxClient() {
   const shareData = {
     title: "Income Tax Calculator Results",
     description: `For annual income of ₹${gross.toLocaleString()}, total tax liability is ₹${result.totalTax.toLocaleString()} under new regime`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "Income Tax",
     results: getExportData()
   };

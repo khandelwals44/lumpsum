@@ -58,7 +58,7 @@ function SwpClient() {
   const shareData = {
     title: "SWP Calculator Results",
     description: `With ₹${corpus.toLocaleString()} corpus, monthly withdrawal of ₹${withdrawal.toLocaleString()} at ${rate}% p.a. will last ${result.monthsSurvived} months`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "SWP",
     results: getExportData()
   };

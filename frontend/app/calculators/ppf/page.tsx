@@ -52,7 +52,7 @@ function PpfClient() {
   const shareData = {
     title: "PPF Calculator Results",
     description: `Monthly PPF contribution of ₹${monthly.toLocaleString()} for ${years} years at ${rate}% p.a. will grow to ₹${result.maturity.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "PPF",
     results: getExportData()
   };

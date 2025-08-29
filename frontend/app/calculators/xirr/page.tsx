@@ -39,7 +39,7 @@ export default function XirrPage() {
   const shareData = {
     title: "XIRR Calculator Results",
     description: `XIRR calculation shows ${rate.toFixed(2)}% annualized return for the given cash flows`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "XIRR",
     results: getExportData()
   };

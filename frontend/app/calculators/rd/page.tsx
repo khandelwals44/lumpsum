@@ -52,7 +52,7 @@ function RdClient() {
   const shareData = {
     title: "RD Calculator Results",
     description: `Monthly RD deposit of ₹${monthly.toLocaleString()} for ${years} years at ${rate}% p.a. will grow to ₹${result.maturity.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "RD",
     results: getExportData()
   };

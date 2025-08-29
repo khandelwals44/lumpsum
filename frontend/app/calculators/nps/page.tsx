@@ -58,7 +58,7 @@ function NpsClient() {
   const shareData = {
     title: "NPS Calculator Results",
     description: `Monthly NPS contribution of ₹${amount.toLocaleString()} for ${years} years will create a corpus of ₹${result.corpus.toLocaleString()} with monthly pension of ₹${result.estimatedPension.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "NPS",
     results: getExportData()
   };

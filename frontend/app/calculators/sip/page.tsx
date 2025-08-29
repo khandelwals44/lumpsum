@@ -78,7 +78,7 @@ function SipClient() {
   const shareData = {
     title: "SIP Calculator Results",
     description: `Monthly investment of ₹${amount.toLocaleString()} for ${years} years at ${rate}% p.a. would grow to ₹${result.maturity.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "SIP",
     results: getExportData()
   };

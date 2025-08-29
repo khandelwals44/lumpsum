@@ -58,7 +58,7 @@ function FdClient() {
   const shareData = {
     title: "FD Calculator Results",
     description: `FD of ₹${principal.toLocaleString()} for ${years} years at ${rate}% p.a. compounded ${m} times yearly will mature to ₹${result.maturity.toLocaleString()}`,
-    url: window.location.href,
+    url: typeof window !== 'undefined' ? window.location.href : '',
     calculatorType: "FD",
     results: getExportData()
   };

@@ -1,9 +1,10 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculatePpf } from "@/lib/calc/ppf";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { ChartContainer } from "@/components/ChartContainer";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
@@ -28,9 +29,33 @@ function PpfClient() {
   const [monthly, setMonthly] = useState(parseParamNumber(sp, "m", 5000));
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 7.1));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 15));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ m: monthly, r: rate, y: years });
 
   const result = useMemo(() => calculatePpf(monthly, rate, years), [monthly, rate, years]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Monthly Contribution": `₹${monthly.toLocaleString()}`,
+      "Interest Rate (p.a.)": `${rate}%`,
+      "Duration": `${years} years`
+    },
+    results: {
+      "Maturity Amount": `₹${result.maturity.toLocaleString()}`,
+      "Total Invested": `₹${result.totalInvested.toLocaleString()}`,
+      "Total Gains": `₹${result.gains.toLocaleString()}`,
+      "Return on Investment": `${((result.gains / result.totalInvested) * 100).toFixed(2)}%`
+    },
+    chartData: result.series
+  });
+
+  const shareData = {
+    title: "PPF Calculator Results",
+    description: `Monthly PPF contribution of ₹${monthly.toLocaleString()} for ${years} years at ${rate}% p.a. will grow to ₹${result.maturity.toLocaleString()}`,
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    calculatorType: "PPF",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -69,11 +94,25 @@ function PpfClient() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Maturity" value={result.maturity} currency />
           <ResultStat label="Total Invested" value={result.totalInvested} currency />
           <ResultStat label="Gains" value={result.gains} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.maturity > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="PPF Calculator Results"
+              calculatorType="PPF"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section>
         <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">

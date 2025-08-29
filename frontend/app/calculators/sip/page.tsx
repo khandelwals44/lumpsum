@@ -2,14 +2,17 @@
  * SIP Calculator Page (UI only)
  * - Uses calculateSip from lib/calc/sip for all math
  * - Offers monthly/yearly toggle for the chart
+ * - Modern UI/UX with improved styling
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateSip } from "@/lib/calc/sip";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
+import { CalculatorLayout, CalculatorCard, ResultsCard } from "@/components/CalculatorLayout";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis, Brush } from "recharts";
 import { chartColors } from "@/lib/charts";
 import { formatINR } from "@/lib/format";
@@ -42,6 +45,7 @@ function SipClient() {
   const [rate, setRate] = useState(parseParamNumber(sp, "r", 12));
   const [years, setYears] = useState(parseParamNumber(sp, "y", 15));
   const [tf, setTf] = useState<Timeframe>("monthly");
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ a: amount, r: rate, y: years });
 
   const result = useMemo(() => calculateSip(amount, rate, years), [amount, rate, years]);
@@ -58,158 +62,160 @@ function SipClient() {
     return out;
   }, [result.series, tf]);
 
+  const getExportData = () => ({
+    inputs: {
+      "Monthly Investment": `₹${amount.toLocaleString()}`,
+      "Expected Return (p.a.)": `${rate}%`,
+      "Duration": `${years} years`
+    },
+    results: {
+      "Maturity Amount": `₹${result.maturity.toLocaleString()}`,
+      "Total Invested": `₹${result.totalInvested.toLocaleString()}`,
+      "Total Gains": `₹${result.gains.toLocaleString()}`,
+      "Return on Investment": `${((result.gains / result.totalInvested) * 100).toFixed(2)}%`
+    },
+    chartData: chartData
+  });
+
+  const shareData = {
+    title: "SIP Calculator Results",
+    description: `Monthly investment of ₹${amount.toLocaleString()} for ${years} years at ${rate}% p.a. would grow to ₹${result.maturity.toLocaleString()}`,
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    calculatorType: "SIP",
+    results: getExportData()
+  };
+
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <section className="space-y-4">
-        <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">SIP Calculator</h1>
-            <ShareButton />
-          </div>
-          <div className="mt-4 space-y-4">
-            <SliderWithInput
-              label="Monthly investment"
-              value={amount}
-              onChange={setAmount}
-              min={500}
-              max={200000}
-              step={500}
-              suffix="₹"
-            />
-            <SliderWithInput
-              label="Expected return (p.a.)"
-              value={rate}
-              onChange={setRate}
-              min={0}
-              max={30}
-              step={0.1}
-              suffix="%"
-            />
-            <SliderWithInput
-              label="Duration (years)"
-              value={years}
-              onChange={setYears}
-              min={1}
-              max={40}
-              step={1}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setAmount(10000);
-                setRate(12);
-                setYears(15);
-              }}
-              className="rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
-            >
-              Reset
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              const newCalculation: Calculation = {
-                type: "sip",
-                inputs: { amount, rate, years },
-                results: {
-                  maturity: result.maturity,
-                  totalInvested: result.totalInvested,
-                  gains: result.gains
-                },
-                timestamp: Date.now()
-              };
-              const savedCalculations = loadLocal<SavedCalculation[]>("savedCalculations", []);
-              saveLocal("savedCalculations", [
-                ...savedCalculations,
-                { ...newCalculation, id: uuidv4() }
-              ]);
-              if (getApiConfig().baseUrl) {
-                Api.saveCalculation(
-                  newCalculation.type,
-                  newCalculation.inputs,
-                  newCalculation.results
-                ).catch(() => {});
-              }
-              alert("Calculation saved!");
-            }}
-            className="mt-2 rounded-md border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
-          >
-            Save Calculation
-          </button>
+    <CalculatorLayout 
+      title="SIP Calculator" 
+      description="Calculate your Systematic Investment Plan (SIP) returns with detailed growth projections"
+    >
+      {/* Input Section */}
+      <CalculatorCard>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Investment Details</h2>
+          <ShareButton />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <ResultStat label="Maturity" value={result.maturity} currency />
-          <ResultStat label="Total Invested" value={result.totalInvested} currency />
-          <ResultStat label="Gains" value={result.gains} currency />
-        </div>
-      </section>
-      <section className="space-y-4">
-        <FadeIn>
-          <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-lg font-medium">Growth over time</h2>
-              <TimeframeToggle value={tf} onChange={setTf} />
-            </div>
-            <ChartContainer>
-              <LineChart data={chartData} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" tickLine={false} />
-                <YAxis tickFormatter={(v) => formatINR(v as number)} tickLine={false} />
-                <Tooltip formatter={(v) => formatINR(v as number)} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="invested"
-                  stroke={chartColors.invested}
-                  name="Invested"
-                  dot={false}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke={chartColors.value}
-                  name="Value"
-                  dot={false}
-                />
-                <Brush dataKey="month" height={20} stroke="#8884d8" />
-              </LineChart>
-            </ChartContainer>
-          </div>
-          <div className="mt-3">
+        
+        <div className="space-y-6">
+          <SliderWithInput
+            label="Monthly investment"
+            value={amount}
+            onChange={setAmount}
+            min={500}
+            max={200000}
+            step={500}
+            suffix="₹"
+          />
+          <SliderWithInput
+            label="Expected return (p.a.)"
+            value={rate}
+            onChange={setRate}
+            min={0}
+            max={30}
+            step={0.1}
+            suffix="%"
+          />
+          <SliderWithInput
+            label="Duration (years)"
+            value={years}
+            onChange={setYears}
+            min={1}
+            max={40}
+            step={1}
+          />
+          
+          <div className="flex flex-wrap items-center gap-3 pt-4">
             <SocialShare />
           </div>
-        </FadeIn>
-        {/* Educational content for SIP */}
-        <article className="prose mt-2 dark:prose-invert">
-          <details open>
-            <summary>What is SIP?</summary>
-            <p>
-              SIP (Systematic Investment Plan) is a way to invest a fixed amount regularly (usually
-              monthly) into mutual funds. It builds discipline and smooths out market volatility.
-            </p>
-          </details>
-          <details>
-            <summary>How it works (formula)</summary>
-            <p>Monthly rate i = R/12/100, n = years×12. Maturity = A × [((1+i)^n − 1)/i] × (1+i)</p>
-          </details>
-          <details>
-            <summary>How to use this calculator</summary>
-            <ol>
-              <li>Enter monthly amount, expected annual return, and duration.</li>
-              <li>Switch the chart between monthly/yearly for a condensed view.</li>
-              <li>Share the resulting URL with friends or advisors.</li>
-            </ol>
-          </details>
-          <details>
-            <summary>FAQs</summary>
-            <ul>
-              <li>Can I pause a SIP? Many funds allow pausing; check with your AMC.</li>
-              <li>Are SIP returns guaranteed? No—returns depend on markets.</li>
-              <li>Taxation? Equity funds are taxed as per capital gains rules.</li>
-            </ul>
-          </details>
-        </article>
-      </section>
-    </div>
+        </div>
+      </CalculatorCard>
+
+      {/* Results Section */}
+      <div className="space-y-6">
+        <ResultsCard>
+          <div ref={resultRef}>
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">SIP Results</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ResultStat label="Maturity Amount" value={result.maturity} currency />
+              <ResultStat label="Total Invested" value={result.totalInvested} currency />
+              <ResultStat label="Total Gains" value={result.gains} currency />
+              <ResultStat label="ROI" value={(result.gains / result.totalInvested) * 100} suffix="%" />
+            </div>
+          </div>
+          
+          {/* Export and Share Buttons */}
+          {result.maturity > 0 && (
+            <div className="flex gap-3 mt-6 pt-6 border-t border-blue-200 dark:border-blue-800">
+              <ExportButton
+                data={getExportData()}
+                title="SIP Calculator Results"
+                calculatorType="SIP"
+                elementRef={resultRef}
+                className="flex-1"
+              />
+              <ShareButton />
+            </div>
+          )}
+        </ResultsCard>
+
+        {/* Chart Section */}
+        <CalculatorCard>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Growth Over Time</h3>
+            <TimeframeToggle value={tf} onChange={setTf} />
+          </div>
+          
+          <ChartContainer>
+            <LineChart 
+              data={chartData} 
+              margin={{ left: 60, right: 30, top: 20, bottom: 20 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="month" 
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+              />
+              <YAxis 
+                tickFormatter={(v) => formatINR(v as number)} 
+                tickLine={false}
+                axisLine={false}
+                tick={{ fontSize: 12, fill: '#6b7280' }}
+                width={80}
+              />
+              <Tooltip 
+                formatter={(v) => formatINR(v as number)}
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Legend />
+              <Line
+                dataKey="invested"
+                type="monotone"
+                stroke={chartColors.invested}
+                name="Invested"
+                dot={false}
+                strokeWidth={2}
+              />
+              <Line
+                dataKey="value"
+                type="monotone"
+                stroke={chartColors.value}
+                name="Value"
+                dot={false}
+                strokeWidth={2}
+              />
+              <Brush dataKey="month" height={30} stroke={chartColors.value} />
+            </LineChart>
+          </ChartContainer>
+        </CalculatorCard>
+      </div>
+    </CalculatorLayout>
   );
 }

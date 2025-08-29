@@ -1,10 +1,11 @@
 "use client";
 /** Income Tax (simplified) – UI only. Not legal/tax advice. */
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateIncomeTaxNewRegime } from "@/lib/calc/incomeTax";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { useSearchParams } from "next/navigation";
 import { parseParamNumber, useUrlState } from "@/lib/url";
 import { formatINR } from "@/lib/format";
@@ -25,8 +26,36 @@ function IncomeTaxClient() {
   const sp = useSearchParams();
   const [gross, setGross] = useState(parseParamNumber(sp, "g", 1200000));
   const [ded, setDed] = useState(parseParamNumber(sp, "d", 50000));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ g: gross, d: ded });
   const result = useMemo(() => calculateIncomeTaxNewRegime(gross, ded), [gross, ded]);
+
+  const getExportData = () => ({
+    inputs: {
+      "Gross Income (Annual)": `₹${gross.toLocaleString()}`,
+      "Deductions": `₹${ded.toLocaleString()}`,
+      "Regime": "New Tax Regime"
+    },
+    results: {
+      "Taxable Income": `₹${result.taxableIncome.toLocaleString()}`,
+      "Tax Payable": `₹${result.taxPayable.toLocaleString()}`,
+      "Cess (4%)": `₹${result.cess.toLocaleString()}`,
+      "Total Tax": `₹${result.totalTax.toLocaleString()}`,
+      "Effective Tax Rate": `${((result.totalTax / gross) * 100).toFixed(2)}%`
+    },
+    chartData: result.breakup.map(row => ({
+      slab: row.slab,
+      tax: row.tax
+    }))
+  });
+
+  const shareData = {
+    title: "Income Tax Calculator Results",
+    description: `For annual income of ₹${gross.toLocaleString()}, total tax liability is ₹${result.totalTax.toLocaleString()} under new regime`,
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    calculatorType: "Income Tax",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -57,12 +86,26 @@ function IncomeTaxClient() {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Taxable income" value={result.taxableIncome} currency />
           <ResultStat label="Tax payable" value={result.taxPayable} currency />
           <ResultStat label="Cess (4%)" value={result.cess} currency />
           <ResultStat label="Total tax" value={result.totalTax} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.totalTax > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="Income Tax Calculator Results"
+              calculatorType="Income Tax"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section>
         <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">

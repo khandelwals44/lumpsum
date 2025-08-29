@@ -3,12 +3,13 @@
  * - Computes inflation-adjusted goal and required SIP/Lumpsum via lib/calc/goal
  */
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useState, useRef } from "react";
 import { calculateGoal } from "@/lib/calc/goal";
 import { SliderWithInput } from "@/components/SliderWithInput";
 import { ResultStat } from "@/components/ResultStat";
 import { ChartContainer } from "@/components/ChartContainer";
 import { ShareButton } from "@/components/ShareButton";
+import ExportButton from "@/components/export/ExportButton";
 import { Line, LineChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from "recharts";
 import { chartColors } from "@/lib/charts";
 import { formatINR } from "@/lib/format";
@@ -33,12 +34,37 @@ function GoalPlannerClient() {
   const [years, setYears] = useState(parseParamNumber(sp, "y", 10));
   const [inflation, setInflation] = useState(parseParamNumber(sp, "inf", 6));
   const [returnPct, setReturnPct] = useState(parseParamNumber(sp, "r", 12));
+  const resultRef = useRef<HTMLDivElement>(null);
   useUrlState({ g: goalToday, y: years, inf: inflation, r: returnPct });
 
   const result = useMemo(
     () => calculateGoal(goalToday, years, inflation, returnPct),
     [goalToday, years, inflation, returnPct]
   );
+
+  const getExportData = () => ({
+    inputs: {
+      "Goal Today": `₹${goalToday.toLocaleString()}`,
+      "Years": `${years} years`,
+      "Inflation Rate": `${inflation}%`,
+      "Expected Return": `${returnPct}%`
+    },
+    results: {
+      "Inflation-adjusted Goal": `₹${result.inflatedGoal.toLocaleString()}`,
+      "Required SIP": `₹${result.requiredSIP.toLocaleString()}`,
+      "Equivalent Lumpsum": `₹${result.requiredLumpsum.toLocaleString()}`,
+      "Inflation Impact": `₹${(result.inflatedGoal - goalToday).toLocaleString()}`
+    },
+    chartData: result.series
+  });
+
+  const shareData = {
+    title: "Goal Planner Results",
+    description: `To achieve ₹${goalToday.toLocaleString()} in ${years} years, you need ₹${result.requiredSIP.toLocaleString()} monthly SIP or ₹${result.requiredLumpsum.toLocaleString()} lumpsum`,
+    url: typeof window !== 'undefined' ? window.location.href : '',
+    calculatorType: "Goal Planner",
+    results: getExportData()
+  };
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -98,11 +124,25 @@ function GoalPlannerClient() {
             </button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div ref={resultRef} className="grid grid-cols-2 gap-3">
           <ResultStat label="Inflation-adjusted goal" value={result.inflatedGoal} currency />
           <ResultStat label="Required SIP" value={result.requiredSIP} currency />
           <ResultStat label="Equivalent Lumpsum" value={result.requiredLumpsum} currency />
         </div>
+        
+        {/* Export and Share Buttons */}
+        {result.inflatedGoal > 0 && (
+          <div className="flex gap-2">
+            <ExportButton
+              data={getExportData()}
+              title="Goal Planner Results"
+              calculatorType="Goal Planner"
+              elementRef={resultRef}
+              className="flex-1"
+            />
+            <ShareButton />
+          </div>
+        )}
       </section>
       <section className="space-y-4">
         <div className="rounded-md border border-zinc-200 p-4 dark:border-zinc-800">
